@@ -2,816 +2,652 @@
 % Copyright (C) 1999  Allen B. Downey
 
 
+\chapter{Member functions}
 
-\chapter{Vectors of Objects}
+\section{Objects and functions}
+\index{member function}
+\index{function!member}
 
-\section{Composition}
-\index{composition}
-\index{nested structure}
+C++ is generally considered an object-oriented programming language,
+which means that it provides features that support object-oriented
+programming.
 
-By now we have seen several examples of composition (the ability to
-combine language features in a variety of arrangements).  One of the
-first examples we saw was using a function invocation as part of an
-expression.  Another example is the nested structure of statements:
-you can put an {\tt if} statement within a {\tt while} loop, or within
-another {\tt if} statement, etc.
-
-Having seen this pattern, and having learned about vectors and objects,
-you should not be surprised to learn that you can have vectors of
-objects.  In fact, you can also have objects that contain vectors (as
-instance variables); you can have vectors that contain vectors; you can
-have objects that contain objects, and so on.
-
-In the next two chapters we will look at some examples of these
-combinations, using {\tt Card} objects as a case study.
-
-\section{{\tt Card} objects}
-\index{Card}
-\index{class!Card}
-
-If you are not familiar with common playing cards, now would be a good
-time to get a deck, or else this chapter might not make much sense.
-There are 52 cards in a deck, each of which belongs to one of four
-suits and one of 13 ranks.  The suits are Spades, Hearts, Diamonds and
-Clubs (in descending order in Bridge).  The ranks are Ace, 2, 3, 4, 5,
-6, 7, 8, 9, 10, Jack, Queen and King.  Depending on what game you are
-playing, the rank of the Ace may be higher than King or lower than 2.
-
-\index{rank}
-\index{suit}
-
-If we want to define a new object to represent a playing card, it is
-pretty obvious what the instance variables should be: {\tt rank} and
-{\tt suit}.  It is not as obvious what type the instance variables
-should be.  One possibility is {\tt apstring}s, containing things like
-{\tt "Spade"} for suits and {\tt "Queen"} for ranks.  One problem with
-this implementation is that it would not be easy to compare cards to
-see which had higher rank or suit.
-
-\index{encode}
-\index{encrypt}
-\index{map to}
-
-An alternative is to use integers to {\bf encode} the ranks and
-suits.  By ``encode,'' I do not mean what some people think, which
-is to encrypt, or translate into a secret code.  What a computer
-scientist means by ``encode'' is something like ``define a mapping
-between a sequence of numbers and the things I want to represent.''
-For example,
-
-\vspace{0.1in}
-\begin{tabular}{l c l}
-Spades & $\mapsto$ & 3 \\
-Hearts & $\mapsto$ & 2 \\
-Diamonds & $\mapsto$ & 1 \\
-Clubs & $\mapsto$ & 0
-\end{tabular}
-\vspace{0.1in}
-
-The symbol $\mapsto$ is mathematical notation for ``maps to.''
-The obvious feature of this mapping is that the suits map to
-integers in order, so we can compare suits by comparing integers.
-The mapping for ranks is fairly obvious; each of the numerical
-ranks maps to the corresponding integer, and for face cards:
-
-\vspace{0.1in}
-\begin{tabular}{l c l}
-Jack & $\mapsto$ & 11 \\
-Queen & $\mapsto$ & 12 \\
-King & $\mapsto$ & 13 \\
-\end{tabular}
-\vspace{0.1in}
-
-The reason I am using mathematical notation for these mappings is
-that they are not part of the C++ program.  They are part of the
-program design, but they never appear explicitly in the code.
-The class definition for the {\tt Card} type looks like this:
-
-\begin{verbatim}
-struct Card
-{
-  int suit, rank;
-
-  Card ();
-  Card (int s, int r);
-};
-
-Card::Card () { 
-  suit = 0;  rank = 0;
-}
-
-Card::Card (int s, int r) { 
-  suit = s;  rank = r;
-}
-\end{verbatim}
-%
-There are two constructors for {\tt Card}s.  You can tell that
-they are constructors because they have no return type and their
-name is the same as the name of the structure.  The first
-constructor takes no arguments and initializes the instance
-variables to a useless value (the zero of clubs).
-
-The second constructor is more useful.  It takes two parameters,
-the suit and rank of the card.
-
-\index{constructor}
-
-The following code creates an object named {\tt threeOfClubs}
-that represents
-the 3 of Clubs:
-
-\begin{verbatim}
-   Card threeOfClubs (0, 3);
-\end{verbatim}
-%
-The first argument, {\tt 0} represents the suit Clubs, the
-second, naturally, represents the rank 3.
-
-\section{The {\tt printCard} function}
-\index{printCard}
-\index{print!Card}
-
-When you create a new type, the first step is usually to declare the
-instance variables and write constructors.  The second step is often
-to write a function that prints the object in human-readable form.
-
-\index{apstring!vector of}
-\index{vector!of apstring}
-
-In the case of {\tt Card} objects, ``human-readable'' means that we
-have to map the internal representation of the rank and suit onto
-words.  A natural way to do that is with a vector of {\tt apstring}s.
-You can create a vector of {\tt apstring}s the same way you create an
-vector of other types:
-
-\begin{verbatim}
-  apvector<apstring> suits (4);
-\end{verbatim}
-%
-Of course, in order to use {\tt apvector}s and {\tt apstring}s, you
-will have to include the header files for both\footnote{{\tt apvector}s
-are a little different from {\tt apstring}s in this regard.
-The file {\tt apvector.cpp} contains a template that allows the
-compiler to create vectors of various kinds.  The first time you
-use a vector of integers, the compiler generates code
-to support that kind of vector.  If you use a vector of {\tt apstring}s,
-the compiler generates different code to handle that kind of
-vector.  As a result, it is usually sufficient to include the
-header file {\tt apvector.h}; you do not have to compile
-{\tt apvector.cpp} at all!  Unfortunately, if you do, you are
-likely to get a long stream of error messages.  I hope this
-footnote helps you avoid an unpleasant surprise, but the details
-in your development environment may differ.}.
-
-To initialize the elements of the vector, we can use a series of
-assignment statements.
-
-\begin{verbatim}
-  suits[0] = "Clubs";
-  suits[1] = "Diamonds";
-  suits[2] = "Hearts";
-  suits[3] = "Spades";
-\end{verbatim}
-%
-A state diagram for this vector looks like this:
-
-\index{state diagram}
-
-\vspace{0.1in}
-\centerline{\epsfig{figure=apstringvector.eps}}
-\vspace{0.1in}
-
-We can build a similar vector to decode the ranks.
-Then we can select the appropriate elements
-using the {\tt suit} and {\tt rank} as indices.  Finally, we can
-write a function called {\tt print} that outputs the card on which
-it is invoked:
-
-\begin{verbatim}
-void Card::print () const
-{
-  apvector<apstring> suits (4);
-  suits[0] = "Clubs";
-  suits[1] = "Diamonds";
-  suits[2] = "Hearts";
-  suits[3] = "Spades";
-
-  apvector<apstring> ranks (14);
-  ranks[1] = "Ace";
-  ranks[2] = "2";
-  ranks[3] = "3";
-  ranks[4] = "4";
-  ranks[5] = "5";
-  ranks[6] = "6";
-  ranks[7] = "7";
-  ranks[8] = "8";
-  ranks[9] = "9";
-  ranks[10] = "10";
-  ranks[11] = "Jack";
-  ranks[12] = "Queen";
-  ranks[13] = "King";
-
-  cout << ranks[rank] << " of " << suits[suit] << endl;
-}
-\end{verbatim}
-%
-The expression {\tt suits[suit]} means ``use the instance variable
-{\tt suit} from the current object as an index into the vector named
-{\tt suits}, and select the appropriate string.''
-
-Because {\tt print} is a {\tt Card} member function,
-it can refer to the instance variables of the current object
-implicitly (without having to use dot notation to specify the
-object).  The output of this code
-
-\begin{verbatim}
-  Card card (1, 11);
-  card.print ();
-\end{verbatim}
-%
-is {\tt Jack of Diamonds}.
-
-You might notice that we are not using the zeroeth element of the {\tt
-ranks} vector.  That's because the only valid ranks are 1--13.  By
-leaving an unused element at the beginning of the vector, we get an
-encoding where 2 maps to ``2'', 3 maps to ``3'', etc.  From the point
-of view of the user, it doesn't matter what the encoding is, since all
-input and output uses human-readable formats.  On the other hand, it
-is often helpful for the programmer if the mappings are easy
-to remember.
-
-\section{The {\tt equals} function}
-\index{same}
-
-In order for two cards to be equal, they have to have the same rank
-and the same suit.  Unfortunately, the {\tt ==} operator does not work
-for user-defined types like {\tt Card}, so we have to write a function
-that compares two cards.  We'll call it {\tt equals}.  It is also
-possible to write a new definition for the {\tt ==} operator, but we
-will not cover that in this book.
-
-It is clear that the return value from {\tt equals} should be a
-boolean that indicates whether the cards are the same.  It is
-also clear that there have to be two {\tt Card}s as parameters.
-But we have one more choice: should {\tt equals} be a member
-function or a free-standing function?
-
-As a member function, it looks like this:
-
-\begin{verbatim}
-bool Card::equals (const Card& c2) const
-{
-  return (rank == c2.rank && suit == c2.suit);
-}
-\end{verbatim}
-%
-To use this function, we have to invoke it on one of the
-cards and pass the other as an argument:
-
-\begin{verbatim}
-  Card card1 (1, 11);
-  Card card2 (1, 11);
-
-  if (card1.equals(card2)) {
-    cout << "Yup, that's the same card." << endl;
-  }
-\end{verbatim}
-%
-This method of invocation always seems strange to me when the
-function is something like {\tt equals}, in which the two
-arguments are symmetric.  What I mean by symmetric is that it
-does not matter whether I ask ``Is A equal to B?'' or
-``Is B equal to A?''  In this case, I think it looks better to rewrite
-{\tt equals} as a nonmember function:
-
-\begin{verbatim}
-bool equals (const Card& c1, const Card& c2)
-{
-  return (c1.rank == c2.rank && c1.suit == c2.suit);
-}
-\end{verbatim}
-%
-When we call this version of the function, the arguments
-appear side-by-side in a way that makes more logical sense,
-to me at least.
-
-\begin{verbatim}
-  if (equals (card1, card2)) {
-    cout << "Yup, that's the same card." << endl;
-  }
-\end{verbatim}
-%
-Of course, this is a matter of taste.  My point here is that
-you should be comfortable writing both member and nonmember
-functions, so that you can choose the interface that works best
-depending on the circumstance.
-
-\section{The {\tt isGreater} function}
-\index{isGreater}
-\index{operator!comparison}
-\index{comparison operator}
-
-For basic types like {\tt int} and {\tt double}, there are comparison
-operators that compare values and determine when one is greater or
-less than another.  These operators ({\tt <} and {\tt >} and the
-others) don't work for user-defined types.  Just as we did for the
-{\tt ==} operator, we will write a comparison function that plays
-the role of the {\tt >} operator.  Later, we will use this function to
-sort a deck of cards.
-
-\index{ordering}
-\index{complete ordering}
-\index{partial ordering}
-
-Some sets are totally ordered, which means that you can compare any
-two elements and tell which is bigger.  For example, the integers and
-the floating-point numbers are totally ordered.  Some sets are
-unordered, which means that there is no meaningful way to say that one
-element is bigger than another.  For example, the fruits are
-unordered, which is why we cannot compare apples and oranges.  As
-another example, the {\tt bool} type is unordered; we cannot say that
-{\tt true} is greater than {\tt false}.
-
-The set of playing cards is partially ordered, which means that
-sometimes we can compare cards and sometimes not.  For example, I know
-that the 3 of Clubs is higher than the 2 of Clubs because it has
-higher rank, and the 3 of Diamonds is higher than the 3 of Clubs
-because it has higher suit.  But which is better, the 3 of Clubs or
-the 2 of Diamonds?  One has a higher rank, but the other has a higher
-suit.
-
-\index{comparable}
-
-In order to make cards comparable, we have to decide which is more
-important, rank or suit.  To be honest, the choice is completely
-arbitrary.  For the sake of choosing, I will say that suit is more
-important, because when you buy a new deck of cards, it comes sorted
-with all the Clubs together, followed by all the Diamonds, and so on.
-
-With that decided, we can write {\tt isGreater}.  Again, the arguments
-(two {\tt Card}s) and the return type (boolean) are obvious, and again
-we have to choose between a member function and a nonmember function.
-This time, the arguments are not symmetric.  It matters whether we
-want to know ``Is A greater than B?'' or ``Is B greater than A?''
-Therefore I think it makes more sense to write {\tt isGreater} as a
-member function:
-
-\begin{verbatim}
-bool Card::isGreater (const Card& c2) const
-{
-  // first check the suits
-  if (suit > c2.suit) return true;
-  if (suit < c2.suit) return false;
-
-  // if the suits are equal, check the ranks
-  if (rank > c2.rank) return true;
-  if (rank < c2.rank) return false;
-
-  // if the ranks are also equal, return false
-  return false;
-}
-\end{verbatim}
-%
-Then when we invoke it, it is obvious from the syntax which
-of the two possible questions we are asking:
-
-\begin{verbatim}
-  Card card1 (2, 11);
-  Card card2 (1, 11);
-
-  if (card1.isGreater (card2)) {
-    card1.print ();
-    cout << "is greater than" << endl;
-    card2.print ();
-  }
-\end{verbatim}
-%
-You can almost read it like English: ``If card1 isGreater card2 ...''
-The output of this program is
-
-\begin{verbatim}
-Jack of Hearts
-is greater than
-Jack of Diamonds
-\end{verbatim}
-%
-According to {\tt isGreater}, aces are
-less than deuces (2s).
-As an exercise, fix it so that aces are ranked higher than Kings,
-as they are in most card games.
-
-\section{Vectors of cards}
-\index{vector!of object}
-\index{object!vector of}
-\index{deck}
-
-The reason I chose {\tt Cards} as the objects for this chapter is that
-there is an obvious use for a vector of cards---a deck.  Here is some
-code that creates a new deck of 52 cards:
-
-\begin{verbatim}
-  apvector<Card> deck (52);
-\end{verbatim}
-%
-Here is the state diagram for this object:
-
-\index{state diagram}
-
-\vspace{0.1in}
-\centerline{\epsfig{figure=cardvector.eps}}
-\vspace{0.1in}
-
-The three dots represent the 48 cards I didn't feel like
-drawing.  Keep in mind that we haven't initialized the instance
-variables of the cards yet.  In some environments, they will get
-initialized to zero, as shown in the figure, but in others they
-could contain any possible value.
-
-One way to initialize them would be to pass a {\tt Card} as
-a second argument to the constructor:
-
-\begin{verbatim}
-  Card aceOfSpades (3, 1);
-  apvector<Card> deck (52, aceOfSpades);
-\end{verbatim}
-%
-This code builds a deck with 52 identical cards, like
-a special deck for a magic trick.  Of course,
-it makes more sense to build a deck with 52 different cards
-in it.  To do that we use a nested loop.
-
-\index{loop!nested}
-\index{nested loop}
-
-The outer loop enumerates the suits, from 0 to 3.  For
-each suit, the inner loop enumerates the ranks, from 1
-to 13.  Since the outer loop iterates 4 times, and
-the inner loop iterates 13 times, the total number of times
-the body is executed is 52 (13 times 4).
-
-\begin{verbatim}
-  int i = 0;
-  for (int suit = 0; suit <= 3; suit++) {
-    for (int rank = 1; rank <= 13; rank++) {
-      deck[i].suit = suit;
-      deck[i].rank = rank;
-      i++;
-    }
-  }
-\end{verbatim}
-%
-I used the variable {\tt i} to keep track of where in the
-deck the next card should go.
-
-\index{index}
-
-Notice that we can compose the syntax for selecting an element
-from an array (the {\tt []} operator) with the syntax for
-selecting an instance variable from an object (the dot
-operator).  The expression {\tt deck[i].suit} means 
-``the suit of the ith card in the deck''.
-
-\index{encapsulation}
-
-As an exercise, encapsulate this deck-building code in a function called
-{\tt buildDeck} that takes no parameters and that returns a
-fully-populated vector of {\tt Card}s.
-
-\section{The {\tt printDeck} function}
-\label{printdeck}
-\index{printDeck}
-\index{print!vector of Cards}
-
-Whenever you are working with vectors, it is convenient to have
-a function that prints the contents of the vector.  We have
-seen the pattern for traversing a vector several times, so the
-following function should be familiar:
-
-\begin{verbatim}
-void printDeck (const apvector<Card>& deck) {
-  for (int i = 0; i < deck.length(); i++) {
-    deck[i].print ();
-  }
-}
-\end{verbatim}
-%
-By now it should come as no surprise that we can compose the
-syntax for vector access with the syntax for invoking a function.
-
-Since {\tt deck} has type {\tt apvector<Card>}, an element of {\tt deck}
-has type {\tt Card}.  Therefore, it is legal to invoke {\tt print}
-on {\tt deck[i]}.
-
-\section{Searching}
-\label{find}
-\index{searching}
-\index{linear search}
-\index{find}
-
-The next function I want to write is {\tt find}, which searches
-through a vector of {\tt Card}s to see whether it contains a certain
-card.  It may not be obvious why this function would be useful, but it
-gives me a chance to demonstrate two ways to go searching for things,
-a {\tt linear} search and a {\tt bisection} search.
-
-\index{traverse}
-\index{loop!search}
-
-Linear search is the more obvious of the two; it involves traversing
-the deck and comparing each card to the one we are looking for.  If we
-find it we return the index where the card appears.  If it is not in
-the deck, we return -1.
-
-\begin{verbatim}
-int find (const Card& card, const apvector<Card>& deck) {
-  for (int i = 0; i < deck.length(); i++) {
-    if (equals (deck[i], card)) return i;
-  }
-  return -1;
-}
-\end{verbatim}
-%
-The loop here is exactly the same as the loop in {\tt printDeck}.
-In fact, when I wrote the program, I copied it, which saved me
-from having to write and debug it twice.
-
-Inside the loop, we compare each element of the deck to
-{\tt card}.  The function returns as soon as it discovers
-the card, which means that we do not have to traverse the entire
-deck if we find the card we are looking for.  If the loop terminates
-without finding the card, we know the card is not in the deck
-and return {\tt -1}.
-
-\index{pattern!eureka}
-\index{statement!return}
-\index{return!inside loop}
-
-To test this function, I wrote the following:
-
-\begin{verbatim}
-  apvector<Card> deck = buildDeck ();
-
-  int index = card.find (deck[17]);
-  cout << "I found the card at index = " << index << endl;
-\end{verbatim}
-%
-The output of this code is
-
-\begin{verbatim}
-I found the card at index = 17
-\end{verbatim}
-%
-
-
-\section{Bisection search}
-\index{bisection search}
-
-If the cards in the deck are not in order, there is no way to search
-that is faster than the linear search.  We have to look at every card,
-since otherwise there is no way to be certain the card we want is not
-there.
-
-But when you look for a word in a dictionary, you don't search
-linearly through every word.  The reason is that the words are in
-alphabetical order.  As a result, you probably use an algorithm that
-is similar to a bisection search:
-
-\begin {enumerate}
-
-\item Start in the middle somewhere.
-
-\item Choose a word on the page and compare it to the word you
-are looking for.
-
-\item If you found the word you are looking for, stop.
-
-\item If the word you are looking for comes after the word on
-the page, flip to somewhere later in the dictionary and go to
-step 2.
-
-\item If the word you are looking for comes before the word on
-the page, flip to somewhere earlier in the dictionary and go to
-step 2.
-
-\end {enumerate}
-
-If you ever get to the point where there are two adjacent words on the
-page and your word comes between them, you can conclude that your word
-is not in the dictionary.  The only alternative is that your word has
-been misfiled somewhere, but that contradicts our assumption that the
-words are in alphabetical order.
-
-In the case of a deck of cards, if we know that the cards are in
-order, we can write a version of {\tt find} that is much faster.  The
-best way to write a bisection search is with a recursive function.
-That's because bisection is naturally recursive.
-
-\index{findBisect}
-
-The trick is to write a function called {\tt findBisect} that takes
-two indices as parameters, {\tt low} and {\tt high}, indicating the
-segment of the vector that should be searched (including both
-{\tt low} and {\tt high}).
+It's not easy to define object-oriented programming, but we have
+already seen some features of it:
 
 \begin{enumerate}
 
-\item To search the vector, choose an index between {\tt low} and {\tt
-high}, and call it {\tt mid}.  Compare the card at {\tt mid} to the
-card you are looking for.
+\item Programs are made up of a collection of structure definitions
+and function definitions, where most of the functions operate on
+specific kinds of structures (or objects).
 
-\item If you found it, stop.
+\item Each structure definition corresponds to some
+object or concept in the real world, and the functions that operate
+on that structure correspond to the ways real-world objects interact.
 
-\item If the card at {\tt mid} is higher than your card, search
-in the range from {\tt low} to {\tt mid-1}.
+\end{enumerate}
 
-\item If the card at {\tt mid} is lower than your card, search
-in the range from {\tt mid+1} to {\tt high}.
+For example, the {\tt Time} structure we defined in Chapter~\ref{time}
+obviously corresponds to the way people record the time of day,
+and the operations we defined correspond to the sorts of things
+people do with recorded times.  Similarly, the {\tt Point} and
+{\tt Rectangle} structures correspond to the mathematical concept
+of a point and a rectangle.
+
+So far, though, we have not taken advantage of the features C++
+provides to support object-oriented programming.  Strictly speaking,
+these features are not necessary.  For the most part they provide
+an alternate syntax for doing things we have already done, but
+in many cases the alternate syntax is more concise and more
+accurately conveys the structure of the program.
+
+For example, in the {\tt Time} program, there is
+no obvious connection between the structure definition and the
+function definitions that follow.  With some examination, it
+is apparent that every function takes at least one {\tt Time}
+structure as a parameter.
+
+This observation is the motivation for {\bf member functions}.
+Member function differ from the other functions we have written
+in two ways:
+
+\begin{enumerate}
+
+\item When we call the function, we {\bf invoke} it on an
+object, rather than just call it.  People sometimes describe
+this process as ``performing an operation on an object,'' or
+``sending a message to an object.''
+
+\item The function is {\em declared} inside the {\tt struct}
+definition, in order to make the relationship between the
+structure and the function explicit.
+
+\end{enumerate}
+
+In the next few sections, we will take the functions from
+Chapter~\ref{time} and transform them into member functions.
+One thing you should realize is that this transformation is
+purely mechanical; in other words, you can do it just by following
+a sequence of steps.
+
+\index{nonmember function}
+\index{function!nonmember}
+
+As I said, anything that can be done with a member function can
+also be done with a nonmember function (sometimes called a
+{\bf free-standing} function).   But sometimes there is an
+advantage to one over the other.  If you are comfortable converting
+from one form to another, you will be able to choose the best
+form for whatever you are doing.
+
+\section{{\tt print}}
+
+In Chapter~\ref{time} we defined a structure named {\tt Time}
+and wrote a function named {\tt printTime}
+
+\begin{lstlisting}
+struct Time {
+  int hour, minute;
+  double second;
+};
+
+void printTime (const Time& time) {
+  cout << time.hour << ":" << time.minute << ":" << time.second << endl;
+}
+\end{lstlisting}
+%
+To call this function, we had to pass a {\tt Time} object as
+a parameter.
+
+\begin{lstlisting}
+  Time currentTime = { 9, 14, 30.0 };
+  printTime (currentTime);
+\end{lstlisting}
+%
+To make {\tt printTime} into a member function, the
+first step is to change the name of the function from {\tt printTime}
+to {\tt Time::print}.  The {\tt ::} operator separates the name
+of the structure from the name of the function; together they
+indicate that this is a function named {\tt print} that can be
+invoked on a {\tt Time} structure.
+
+The next step is to eliminate the parameter.  Instead of passing
+an object as an argument, we are going to invoke the function
+on an object.
+
+As a result, inside the function, we no longer have a parameter named
+{\tt time}.  Instead, we have a {\bf current object}, which is the
+object the function is invoked on.  We can refer to the current object
+using the C++ keyword {\tt this}.
+
+\index{current object}
+\index{object!current}
+\index{pointer}
+\index{this}
+
+One thing that makes life a little difficult is that {\tt this}
+is actually a {\bf pointer} to a structure, rather than a structure
+itself.  A pointer is similar to a reference, but I don't want
+to go into the details of using pointers yet.  The only pointer
+operation we need for now is the {\tt *} operator, which converts
+a structure pointer into a structure.  In the following
+function, we use it to assign the value of {\tt this} to a local
+variable named {\tt time}:
+
+\begin{lstlisting}
+void Time::print () {
+  Time time = *this;
+  cout << time.hour << ":" << time.minute << ":" << time.second << endl;
+}
+\end{lstlisting}
+%
+The first two lines of this function changed quite a bit as we
+transformed it into a member function, but notice that the output
+statement itself did not change at all.
+
+In order to invoke the new version of {\tt print}, we have
+to invoke it on a {\tt Time} object:
+
+\begin{lstlisting}
+  Time currentTime = { 9, 14, 30.0 };
+  currentTime.print ();
+\end{lstlisting}
+%
+The last step of the transformation process is that we have to
+declare the new function inside the structure definition:
+
+\begin{lstlisting}
+struct Time {
+  int hour, minute;
+  double second;
+
+  void Time::print ();
+};
+\end{lstlisting}
+%
+A {\bf function declaration} looks just like the first line of the
+function definition, except that it has a semi-colon at the end.  The
+declaration describes the {\bf interface} of the function; that is,
+the number and types of the arguments, and the type of the return
+value.
+
+When you declare a function, you are making a promise to the compiler
+that you will, at some point later on in the program, provide a
+definition for the function.  This definition is sometimes called
+the {\bf implementation} of the function, since it contains the
+details of how the function works.  If you omit the definition, or
+provide a definition that has an interface different from what
+you promised, the compiler will complain.
+
+\section {Implicit variable access}
+
+Actually, the new version of {\tt Time::print} is more complicated
+than it needs to be.  We don't really need to create a local
+variable in order to refer to the instance variables of the current
+object.
+
+If the function refers to {\tt hour}, {\tt minute}, or {\tt second},
+all by themselves with no dot notation, C++ knows that it must
+be referring to the current object.  So we could have written:
+
+\begin{lstlisting}
+void Time::print ()
+{
+  cout << hour << ":" << minute << ":" << second << endl;
+}
+\end{lstlisting}
+%
+This kind of variable access is called ``implicit'' because the
+name of the object does not appear explicitly.  Features like
+this are one reason member functions are often more concise
+than nonmember functions.
+
+\section {Another example}
+
+Let's convert {\tt increment} to a member function.  Again, we
+are going to transform one of the parameters into the implicit
+parameter called {\tt this}.  Then we can go through the function
+and make all the variable accesses implicit.
+
+\begin{lstlisting}
+void Time::increment (double secs) {
+  second += secs;
+
+  while (second >= 60.0) {
+    second -= 60.0;
+    minute += 1;
+  }
+  while (minute >= 60) {
+    minute -= 60.0;
+    hour += 1;
+  }
+}
+\end{lstlisting}
+%
+By the way, remember that this is not the most efficient implementation
+of this function.  If you didn't do it back in Chapter~\ref{time}, you
+should write a more efficient version now.
+
+To declare the function, we can just copy the first line into the
+structure definition:
+
+\begin{lstlisting}
+struct Time {
+  int hour, minute;
+  double second;
+
+  void Time::print ();
+  void Time::increment (double secs);
+};
+\end{lstlisting}
+%
+And again, to call it, we have to invoke it on a {\tt Time}
+object:
+
+\begin{lstlisting}
+  Time currentTime = { 9, 14, 30.0 };
+  currentTime.increment (500.0);
+  currentTime.print ();
+\end{lstlisting}
+%
+The output of this program is {\tt 9:22:50}.
+
+\section{Yet another example}
+
+The original version of {\tt convertToSeconds} looked like this:
+
+\begin{lstlisting}
+double convertToSeconds (const Time& time) {
+  int minutes = time.hour * 60 + time.minute;
+  double seconds = minutes * 60 + time.second;
+  return seconds;
+}
+\end{lstlisting}
+%
+It is straightforward to convert this to a member function:
+
+\begin{lstlisting}
+double Time::convertToSeconds () const {
+  int minutes = hour * 60 + minute;
+  double seconds = minutes * 60 + second;
+  return seconds;
+}
+\end{lstlisting}
+%
+The interesting thing here is that the implicit parameter should
+be declared {\tt const}, since we don't modify it in this function.
+But it is not obvious where we should put information about a
+parameter that doesn't exist.  The answer, as you can see in the
+example, is after the parameter list (which is empty in this case).
+
+The {\tt print} function in the previous section should also
+declare that the implicit parameter is {\tt const}.
+
+\section {A more complicated example}
+
+Although the process of transforming functions into member
+functions is mechanical, there are some oddities.  For example,
+{\tt after} operates on two {\tt Time} structures, not just
+one, and we can't make both of them implicit.  Instead, we have
+to invoke the function on one of them and pass the other as
+an argument.
+
+Inside the function, we can refer to one of the them implicitly,
+but to access the instance variables of the other we continue
+to use dot notation.
+
+\begin{lstlisting}
+bool Time::after (const Time& time2) const {
+  if (hour > time2.hour) return true;
+  if (hour < time2.hour) return false;
+
+  if (minute > time2.minute) return true;
+  if (minute < time2.minute) return false;
+
+  if (second > time2.second) return true;
+  return false;
+}
+\end{lstlisting}
+%
+To invoke this function:
+
+\begin{lstlisting}
+  if (doneTime.after (currentTime)) {
+    cout << "The bread will be done after it starts." << endl;
+  }
+\end{lstlisting}
+%
+You can almost read the invocation like English: ``If the
+done-time is after the current-time, then...''
+
+\section{Constructors}
+
+Another function we wrote in Chapter~\ref{time} was
+{\tt makeTime}:
+
+\begin{lstlisting}
+Time makeTime (double secs) {
+  Time time;
+  time.hour = int (secs / 3600.0);
+  secs -= time.hour * 3600.0;
+  time.minute = int (secs / 60.0);
+  secs -= time.minute * 60.0;
+  time.second = secs;
+  return time;
+}
+\end{lstlisting}
+%
+Of course, for every new type, we need to be able to create
+new objects.  In fact, functions like {\tt makeTime} are so
+common that there is a special function syntax for them.  These
+functions are called {\bf constructors} and the syntax looks
+like this:
+
+\begin{lstlisting}
+Time::Time (double secs) {
+  hour = int (secs / 3600.0);
+  secs -= hour * 3600.0;
+  minute = int (secs / 60.0);
+  secs -= minute * 60.0;
+  second = secs;
+}
+\end{lstlisting}
+%
+First, notice that the constructor has the same name as the
+class, and no return type.  The arguments haven't changed, though.
+
+Second, notice that we don't have to create a new time object,
+and we don't have to return anything.  Both of these steps are
+handled automatically.  We can refer to the new object---the one
+we are constructing---using the keyword {\tt this}, or implicitly
+as shown here.  When we write values to {\tt hour}, {\tt minute}
+and {\tt second}, the compiler knows we are referring to the instance
+variables of the new object.
+
+To invoke the constructor, you use syntax that is a cross
+between a variable declaration and a function call:
+
+\begin{lstlisting}
+  Time time (seconds);
+\end{lstlisting}
+%
+This statement declares that the variable {\tt time} has
+type {\tt Time}, and it invokes the constructor we just wrote,
+passing the value of {\tt seconds} as an argument.  The system
+allocates space for the new object and the constructor initializes
+its instance variables.  The result is assigned to the variable
+{\tt time}.
+
+
+\section {Initialize or construct?}
+
+Earlier we declared and initialized some {\tt Time} structures
+using squiggly-braces:
+
+\begin{lstlisting}
+  Time currentTime = { 9, 14, 30.0 };
+  Time breadTime = { 3, 35, 0.0 };
+\end{lstlisting}
+%
+Now, using constructors, we have a different way to declare
+and initialize:
+
+\begin{lstlisting}
+  Time time (seconds);
+\end{lstlisting}
+%
+These two functions represent different programming styles, and
+different points in the history of C++.  Maybe
+for that reason, the C++ compiler requires that you use one or
+the other, and not both in the same program.
+
+If you define a constructor for a structure, then you have to
+use the constructor to initialize all new structures of that
+type.  The alternate syntax using squiggly-braces is no longer
+allowed.
+
+Fortunately, it is legal to overload constructors in the same
+way we overloaded functions.  In other words, there can be more
+than one constructor with the same ``name,'' as long as they
+take different parameters.  Then, when we initialize a new object
+the compiler will try to find a constructor that takes the
+appropriate parameters.
+
+For example, it is common to have a constructor that takes
+one parameter for each instance variable, and that assigns
+the values of the parameters to the instance variables:
+
+\begin{lstlisting}
+Time::Time (int h, int m, double s)
+{
+  hour = h;  minute = m;  second = s;
+}
+\end{lstlisting}
+%
+To invoke this constructor, we use the same funny syntax
+as before, except that the arguments have to be two integers
+and a {\tt double}:
+
+\begin{lstlisting}
+  Time currentTime (9, 14, 30.0);
+\end{lstlisting}
+
+\section {One last example}
+
+The final example we'll look at is {\tt addTime}:
+
+\begin{lstlisting}
+Time addTime2 (const Time& t1, const Time& t2) {
+  double seconds = convertToSeconds (t1) + convertToSeconds (t2);
+  return makeTime (seconds);
+}
+\end{lstlisting}
+%
+We have to make several changes to this function, including:
+
+\begin{enumerate}
+
+\item Change the name from {\tt addTime} to {\tt Time::add}.
+
+\item Replace the first parameter with an implicit parameter,
+which should be declared {\tt const}.
+
+\item Replace the use of {\tt makeTime} with a constructor
+invocation.
 
 \end{enumerate}
 %
-Steps 3 and 4 look suspiciously like recursive
-invocations.  Here's what this all looks like translated into
-C++:
+Here's the result:
 
-\begin{verbatim}
-int findBisect (const Card& card, const apvector<Card>& deck,
-                int low, int high) {
-  int mid = (high + low) / 2;
-
-  // if we found the card, return its index
-  if (equals (deck[mid], card)) return mid;
-
-  // otherwise, compare the card to the middle card
-  if (deck[mid].isGreater (card)) {
-    // search the first half of the deck
-    return findBisect (card, deck, low, mid-1);
-  } else {
-    // search the second half of the deck
-    return findBisect (card, deck, mid+1, high);
-  }
+\begin{lstlisting}
+Time Time::add (const Time& t2) const {
+  double seconds = convertToSeconds () + t2.convertToSeconds ();
+  Time time (seconds);
+  return time;
 }
-\end{verbatim}
+\end{lstlisting}
 %
-Although this code contains the kernel of a bisection search, it
-is still missing a piece.  As it is currently written,
-if the card is not in the deck, it will recurse forever.  We
-need a way to detect this condition and deal with it properly
-(by returning {\tt -1}).
+The first time we invoke {\tt convertToSeconds},
+there is no apparent object!  Inside a member function, the compiler
+assumes that we want to invoke the function on the current object.
+Thus, the first invocation acts on {\tt this}; the second
+invocation acts on {\tt t2}.
 
-\index{recursion}
+The next line of the function invokes the constructor that
+takes a single {\tt double} as a parameter; the last line returns
+the resulting object.
 
-The easiest way to tell that your card is not in the deck
-is if there are {\em no} cards in the deck, which is the
-case if {\tt high} is less than {\tt low}.  Well, there are
-still cards in the deck, of course, but what I mean is that
-there are no cards in the segment of the deck indicated by
-{\tt low} and {\tt high}.
+\section {Header files}
 
-With that line added, the function works correctly:
+It might seem like a nuisance to declare functions inside
+the structure definition and then define the functions later.
+Any time you change the interface to a function, you have
+to change it in two places, even if it is a small change
+like declaring one of the parameters {\tt const}.
 
+There is a reason for the hassle, though, which is that it
+is now possible to separate the structure definition and the
+functions into two files: the {\bf header file},
+which contains the structure definition, and the implementation
+file, which contains the functions.
+
+Header files usually have the same name as the implementation
+file, but with the suffix {\tt .h} instead of {\tt .cpp}.  For
+the example we have been looking at, the header file is called
+{\tt Time.h}, and it contains the following:
+
+\lstinputlisting{../code/cha12/Time.h}
+
+%
+Notice that in the structure definition I don't really have
+to include the prefix {\tt Time::} at the beginning of every
+function name.  The compiler knows that we are declaring functions
+that are members of the {\tt Time} structure.
+
+{\tt Time.cpp} contains the definitions of the member functions
+(I have elided the function bodies to save space):
+
+\begin{lstlisting}
+#include <iostream>
+using namespace std;
+#include "Time.h"
+
+Time::Time (int h, int m, double s)  ...
+
+Time::Time (double secs) ...
+
+void Time::increment (double secs) ...
+
+void Time::print () const ...
+
+bool Time::after (const Time& time2) const ...
+
+Time Time::add (const Time& t2) const ...
+
+double Time::convertToSeconds () const ...
+\end{lstlisting}
+%
+In this case the definitions in {\tt Time.cpp} appear in the
+same order as the declarations in {\tt Time.h}, although it
+is not necessary.
+
+On the other hand, it is necessary to include the header
+file using an {\tt include} statement.  That way, while the
+compiler is reading the function definitions, it knows enough
+about the structure to check the code and catch errors.
+
+Finally, {\tt main.cpp} contains the function {\tt main} along
+with any functions we want that are not members of the {\tt Time}
+structure (in this case there are none):
+
+\lstinputlisting{../code/cha12/main.cpp}
+%
+Again, {\tt main.cpp} has to include the header file.
+
+It may not be obvious why it is useful to break such a small
+program into three pieces.  In fact, most of the advantages come
+when we are working with larger programs:
+
+\begin{description}
+
+\item[Reuse:]  Once you have written a structure like {\tt Time},
+you might find it useful in more than one program.  By separating
+the definition of {\tt Time} from {\tt main.cpp}, you make is easy
+to include the {\tt Time} structure in another program.
+
+\item[Managing interactions:]  As systems become large, the number
+of interactions between components grows and quickly becomes
+unmanageable.  It is often useful to minimize these interactions
+by separating modules like {\tt Time.cpp} from the programs that
+use them.
+
+\item[Separate compilation:]  Separate files can be compiled
+separately and then linked into a single program later.  The details
+of how to do this depend on your programming environment.  As
+the program gets large, separate compilation can save a lot of time,
+since you usually need to compile only a few files at a time.
+
+\end{description}
+
+For small programs like the ones in this book, there is
+no great advantage to splitting up programs.  But it is good
+for you to know about this feature, especially since it explains
+one of the statements that appeared in the first program we
+wrote:
+
+\begin{lstlisting}
+#include <iostream>
+using namespace std;
+\end{lstlisting}
+%
+{\tt iostream} is the header file that contains declarations
+for {\tt cin} and {\tt cout} and the functions that operate on
+them.  When you compile your program, you need the information
+in that header file.
+
+The implementations of those functions are stored in a library,
+sometimes called the ``Standard Library'' that gets linked to
+your program automatically.  The nice thing is that you don't
+have to recompile the library every time you compile a program.
+For the most part the library doesn't change, so there is no
+reason to recompile it.
+
+Whereas IDE's like Visual Studio will take care of compiling 
+all of your libraries for you (or not), in a command line environment 
+you have to specify which files to compile.  For the above Time program 
+that would look like: 
 \begin{verbatim}
-int findBisect (const Card& card, const apvector<Card>& deck,
-                int low, int high) {
-
-  cout << low << ", " << high << endl;
-
-  if (high < low) return -1;
-
-  int mid = (high + low) / 2;
-
-  if (equals (deck[mid], card)) return mid;
-
-  if (deck[mid].isGreater (card)) {
-    return findBisect (card, deck, low, mid-1);
-  } else {
-    return findBisect (card, deck, mid+1, high);
-  }
-}
+g++ Time.cpp main.cpp
 \end{verbatim}
-%
-I added an output statement at the beginning so I could watch
-the sequence of recursive calls and convince myself
-that it would eventually reach the base case.  I tried out the
-following code:
-
-\begin{verbatim}
-  cout << findBisect (deck, deck[23], 0, 51));
-\end{verbatim}
-%
-And got the following output:
-
-\begin{verbatim}
-0, 51
-0, 24
-13, 24
-19, 24
-22, 24
-I found the card at index = 23
-\end{verbatim}
-%
-Then I made up a card that is not in the deck (the 15 of Diamonds),
-and tried to find it.  I got the following:
-
-\begin{verbatim}
-0, 51
-0, 24
-13, 24
-13, 17
-13, 14
-13, 12
-I found the card at index = -1
-\end{verbatim}
-%
-These tests don't prove that this program is correct.  In fact, no
-amount of testing can prove that a program is correct.  On the other
-hand, by looking at a few cases and examining the code, you might be
-able to convince yourself.
-
-\index{testing}
-\index{correctness}
-
-The number of recursive calls is fairly small, typically 6 or 7.  That
-means we only had to call {\tt equals} and {\tt isGreater} 6 or 7
-times, compared to up to 52 times if we did a linear search.  In
-general, bisection is much faster than a linear search, especially for
-large vectors.
-
-Two common errors in recursive programs are forgetting to include a
-base case and writing the recursive call so that the base case is never
-reached.  Either error will cause an infinite recursion, in which case
-C++ will (eventually) generate a run-time error.
-
-\index{recursion!infinite}
-\index{infinite recursion}
-\index{run-time error}
-
-\section{Decks and subdecks}
-\index{deck}
-\index{subdeck}
-
-Looking at the interface to {\tt findBisect}
-
-\begin{verbatim}
-int findBisect (const Card& card, const apvector<Card>& deck,
-		int low, int high) {
-\end{verbatim}
-%
-it might make sense to treat three of the parameters, {\tt deck}, {\tt
-low} and {\tt high}, as a single parameter that specifies a {\bf
-subdeck}.
-
-\index{parameter!abstract}
-\index{abstract parameter}
-
-This kind of thing is quite common, and I sometimes think of it as an
-{\bf abstract parameter}.  What I mean by ``abstract,'' is something
-that is not literally part of the program text, but which describes the
-function of the program at a higher level.
-
-For example, when you call a function and pass a vector and the bounds
-{\tt low} and {\tt high}, there is nothing that prevents the called
-function from accessing parts of the vector that are out of bounds.  So
-you are not literally sending a subset of the deck; you are really
-sending the whole deck.  But as long as the recipient plays by the
-rules, it makes sense to think of it, abstractly, as a subdeck.
-
-There is one other example of this kind of abstraction that you might
-have noticed in Section~\ref{objectops}, when I referred to an
-``empty'' data structure.  The reason I put ``empty'' in quotation
-marks was to suggest that it is not literally accurate.  All variables
-have values all the time.  When you create them, they are given
-default values.  So there is no such thing as an empty object.
-
-But if the program guarantees that the current value of a variable is
-never read before it is written, then the current value is irrelevant.
-Abstractly, it makes sense to think of such a variable as ``empty.''
-
-This kind of thinking, in which a program comes to take on meaning
-beyond what is literally encoded, is a very important part of thinking
-like a computer scientist.  Sometimes, the word ``abstract'' gets used
-so often and in so many contexts that it is hard to interpret.
-Nevertheless, abstraction is a central idea in computer science (as
-well as many other fields).
-
-\index{abstraction}
-
-A more general definition of ``abstraction'' is ``The process of
-modeling a complex system with a simplified description in order to
-suppress unnecessary details while capturing relevant behavior.''
-
+But you might imagine that for a very large program with many objects
+this could get tedious.  Luckily there are {\tt makefile}s which you can use
+to organize all of your files and then compile the ones that need recompiling
+with simple commands like {\tt make}.
 \section{Glossary}
 
 \begin{description}
 
-\item[encode:]  To represent one set of values using another
-set of values, by constructing a mapping between them.
+\item[member function:]  A function that operates on an object
+that is passed as an implicit parameter named {\tt this}.
 
-\item[abstract parameter:]  A set of parameters that act together
-as a single parameter.
+\item[nonmember function:]  A function that is not a member
+of any structure definition.  Also called a ``free-standing''
+function.
 
-\index{encode}
-\index{abstract parameter}
+\item[invoke:] To call a function ``on'' an object, in order to
+pass the object as an implicit parameter.
+
+\item[current object:]  The object on which a member function
+is invoked.  Inside the member function, we can refer to the
+current object implicitly, or by using the keyword {\tt this}.
+
+\item[this:]  A keyword that refers to the current object.
+{\tt this} is a pointer, which makes it difficult to use, since
+we do not cover pointers in this book.
+
+\item[interface:] A description of how a function is used, including
+the number and types of the parameters and the type of the return
+value.
+
+\item[function declaration:] A statement that declares the interface
+to a function without providing the body.  Declarations of
+member functions appear inside structure definitions even if the
+definitions appear outside.
+
+\item[implementation:] The body of a function, or the details of how
+a function works.
+
+\item[constructor:] A special function that initializes the instance
+variables of a newly-created object.
+
+\index{member function}
+\index{nonmember function}
+\index{function!member}
+\index{function!nonmember}
+\index{interface}
+\index{implementation}
+\index{invoke}
+\index{constructor}
 
 \end{description}
-
 

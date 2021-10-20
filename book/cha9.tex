@@ -2,557 +2,528 @@
 % Copyright (C) 1999  Allen B. Downey
 
 
+\chapter{File Input/Output and 2D Arrays}
 
-\chapter{More structures}
-\label{time}
-\index{struct}
+In this chapter we will develop a program that reads and writes files,
+parses input, and demonstrates 2D Arrays.  We will also
+implement a data structure called {\tt Set} that expands automatically
+as you add elements.
 
-\section{Time}
-\index{struct!Time}
-\index{Time}
-
-As a second example of a user-defined structure, we will define a type
-called {\tt Time}, which is used to record the time of day.  The
-various pieces of information that form a time are the hour, minute
-and second, so these will be the instance variables of the structure.
-
-The first step is to decide what type each instance variable should
-be.  It seems clear that {\tt hour} and {\tt minute} should be
-integers.  Just to keep things interesting, let's make {\tt second} a
-{\tt double}, so we can record fractions of a second.
-
-Here's what the structure definition looks like:
+Aside from demonstrating all these features, the real purpose of the
+program is to generate a two-dimensional table of
+the distances between cities in the United States.
+The output is a table that looks like this:
 
 \begin{verbatim}
-struct Time {
-  int hour, minute;
-  double second;
-};
+Atlanta 0
+Chicago 700     0
+Boston  1100    1000    0
+Dallas  800     900     1750    0
+Denver  1450    1000    2000    800     0
+Detroit 750     300     800     1150    1300    0
+Orlando 400     1150    1300    1100    1900    1200    0
+Phoenix 1850    1750    2650    1000    800     2000    2100    0
+Seattle 2650    2000    3000    2150    1350    2300    3100    1450    0
+        Atlanta Chicago Boston  Dallas  Denver  Detroit Orlando Phoenix Seattle
 \end{verbatim}
 %
-We can create a {\tt Time} object in the usual way:
+The diagonal elements are all zero because that is the distance
+from a city to itself.  Also, because
+the distance from A to B is the same as the distance from B
+to A, there is no need to print the top half of the matrix.
+
+\section {Streams}
+\index{stream}
+
+To get input from a file or send output to a file, you have to
+create an {\tt ifstream} object (for input files) or an
+{\tt ofstream} object (for output files).  These objects
+are defined in the header file {\tt fstream}, which you
+have to include.
+
+\index{header file}
+
+A {\bf stream} is an abstract object that represents the flow
+of data from a source like the keyboard or a file to a destination
+like the screen or a file.
+
+We have already worked with two streams: {\tt cin}, which has type
+{\tt istream}, and {\tt cout}, which has type {\tt ostream}.
+{\tt cin} represents the flow of data from the keyboard to
+the program.  Each time the program uses the {\tt >>} operator
+or the {\tt getline} function, it removes a piece of data
+from the input stream.
+
+\index{cin}
+\index{cout}
+\index{istream}
+\index{ostream}
+
+Similarly, when the program uses the {\tt <<} operator on
+an {\tt ostream}, it adds a datum to the outgoing stream.
+
+\section {File input}
+\label{finput}
+\index{file!input}
+\index{ifstream}
+
+To get data from a file, we have to create a stream that flows
+from the file into the program.  
+We can do that using the {\tt ifstream} constructor.
+
+\begin{lstlisting}
+  ifstream infile ("file-name");
+\end{lstlisting}
+%
+The argument for this constructor is a string that
+contains the name of the file you want to open.  The result
+is an object named {\tt infile} that supports all the same
+operations as {\tt cin}, including {\tt >>} and {\tt getline}.
+
+\begin{lstlisting}
+  int x;
+  string line;
+    
+  infile >> x;               // get a single integer and store in x
+  getline (infile, line);    // get a whole line and store in line
+\end{lstlisting}
+%
+If we know ahead of time how much data is in a file, it is 
+straightforward to write a loop that reads the entire file and
+then stops.  More often, though, we want to read the entire
+file, but don't know how big it is.
+
+There are member functions for {\tt ifstreams} that check the status
+of the input stream; they are called {\tt good}, {\tt eof}, {\tt fail}
+and {\tt bad}.  We will use {\tt good} to make sure the file was
+opened successfully and {\tt eof} to detect the ``end of file.''
+
+\index{stream!status}
+\index{good}
+\index{eof}
+\index{end of file}
+
+Whenever you get data from an input stream, you don't
+know whether the attempt succeeded until you check.  If the
+return value from {\tt eof} is {\tt true} then we have reached
+the end of the file and we know that the last attempt failed.
+Here is a program that reads lines from a file and displays
+them on the screen:
+
+\begin{lstlisting}
+  string fileName = ...;
+  ifstream infile (fileName);
+
+  if (infile.good() == false) {
+    cout << "Unable to open the file named " << fileName;
+    exit (1);
+  }
+
+  while (true) {
+    getline (infile, line);
+    if (infile.eof()) break;
+    cout << line << endl;
+  }
+\end{lstlisting}
+%
+
+Immediately after opening the file, we invoke the {\tt good} function.
+The return value is {\tt false} if the system could not open the file,
+most likely because it does not exist, or you do not have permission
+to read it.
+
+\index{loop!infinite}
+\index{infinite loop}
+
+The statement {\tt while(true)} is an idiom for an infinite
+loop.  Usually there will be a {\tt break} statement somewhere in
+the loop so that the program does not really run forever (although
+some programs do).  In this case, the {\tt break} statement allows
+us to exit the loop as soon as we detect the end of file.
+
+\index{break statement}
+\index{statement!break}
+\index{getline}
+
+It is important to exit the loop between the input statement and
+the output statement, so that when {\tt getline} fails at the
+end of the file, we do not output the invalid data in {\tt line}.
+
+\section{File output}
+\index{file output}
+\index{ofstream}
+
+Sending output to a file is similar.  For example, we could
+modify the previous program to copy lines from one file to
+another.
+
+\begin{lstlisting}
+  ifstream infile ("input-file");
+  ofstream outfile ("output-file");
+
+  if (infile.good() == false || outfile.good() == false) {
+    cout << "Unable to open one of the files." << endl;
+    exit (1);
+  }
+
+  while (true) {
+    getline (infile, line);
+    if (infile.eof()) break;
+    outfile << line << endl;
+  }
+\end{lstlisting}
+
+\section{Parsing input}
+\label{parsing}
+\index{parsing}
+
+In Section~\ref{formal} I defined ``parsing'' as the process of
+analyzing the structure of a sentence in a natural language or a
+statement in a formal language.  For example, the compiler has to
+parse your program before it can translate it into machine language.
+
+In addition, when you read input from a file or from the keyboard
+you often have to parse it in order to extract the information
+you want and detect errors.
+
+For example, I have a file called {\tt distances} that contains
+information about the distances between major cities in the
+United States.  I got this information from a randomly-chosen
+web page
+
+\begin{lstlisting}
+http://www.jaring.my/usiskl/usa/distance.html
+\end{lstlisting}
+%
+so it may be wildly inaccurate, but that doesn't matter.  The
+format of the file looks like this:
 
 \begin{verbatim}
-  Time time = { 11, 59, 3.14159 };
+"Atlanta"       "Chicago"       700
+"Atlanta"       "Boston"        1,100
+"Atlanta"       "Chicago"       700
+"Atlanta"       "Dallas"        800
+"Atlanta"       "Denver"        1,450
+"Atlanta"       "Detroit"       750
+"Atlanta"       "Orlando"       400
 \end{verbatim}
 %
-The state diagram for this object looks like this:
+Each line of the file contains the names of two cities in quotation
+marks and the distance between them in miles.  The quotation marks
+are useful because they make it easy to deal with names that have
+more than one word, like ``San Francisco.''
 
-\vspace{0.1in}
-\centerline{\epsfig{figure=time.eps}}
-\vspace{0.1in}
+By searching for the quotation marks in a line of input, we
+can find the beginning and end of each city name.
+Searching for special characters like quotation marks can be a little
+awkward, though, because the quotation mark is a special character
+in C++, used to identify string values.
 
-The word ``instance'' is sometimes used when we talk about objects,
-because every object is an instance (or example) of some type.  The
-reason that instance variables are so-named is that every instance of
-a type has a copy of the instance variables for that type.
+If we want to find the
+first appearance of a quotation mark, we have to write something
+like:
 
-\section{{\tt printTime}}
-\label{printobject}
-\index{output}
-\index{statement!output}
-\index{object!output}
+\begin{lstlisting}
+  int index = line.find ('\"');
+\end{lstlisting}
+%
+The argument here looks like a mess, but it represents a single
+character, a double quotation mark.  The outermost single-quotes
+indicate that this is a character value, as usual.  The backslash
+(\verb+\+) indicates that we want to treat the next character
+literally.  The sequence \verb+\"+ represents a quotation mark; the
+sequence \verb+\'+ represents a single-quote.  Interestingly, the
+sequence \verb+\\+ represents a single backslash.  The first backslash
+indicates that we should take the second backslash seriously.
 
-When we define a new type it is a good idea to write
-function that displays the instance variables in a human-readable
-form.  For example:
+\index{special character}
+\index{character!special sequence}
+\index{backslash}
 
-\begin{verbatim}
-void printTime (Time& t) {
-  cout << t.hour << ":" << t.minute << ":" << t.second << endl;
+Parsing input lines consists of finding the beginning and
+end of each city name and using
+the {\tt substr} function to extract the cities and distance.
+{\tt substr} is a {\tt string} member function;
+it takes two arguments, the starting index of the substring
+and the length.
+
+\index{find}
+
+\begin{lstlisting}
+void processLine (string line, string& city1, string& city2, string& distString) {
+  // the character we are looking for is a quotation mark
+  char quote = '\"';
+
+  // store the indices of the quotation marks in an array
+  int quoteIndex[4];
+
+  // find the first quotation mark using the built-in find
+  quoteIndex[0] = line.find (quote);
+
+  // find the other quotation marks using the find from Chapter 7
+  for (int i=1; i<4; i++) {
+    quoteIndex[i] = find (line, quote, quoteIndex[i-1]+1);
+  }
+
+  // break the line up into substrings
+  int len1 = quoteIndex[1] - quoteIndex[0] - 1;
+  city1 = line.substr (quoteIndex[0]+1, len1);
+  int len2 = quoteIndex[3] - quoteIndex[2] - 1;
+  city2 = line.substr (quoteIndex[2]+1, len2);
+  int len3 = line.length() - quoteIndex[2] - 1;
+  distString = line.substr (quoteIndex[3]+1, len3);
+
+  // output the extracted information
+  cout << city1 << "\t" << city2 << "\t" << distString << endl;
 }
-\end{verbatim}
+\end{lstlisting}
 %
-The output of this function, if we pass {\tt time}
-an argument, is {\tt 11:59:3.14159}.
+Of course, just displaying the extracted information is not
+exactly what we want, but it is a good starting place.
 
-\begin{verbatim}
-#include <iostream>
+\section{Parsing numbers}
+\label{parsingnums}
+\index{parsing number}
+\index{atoi}
+\index{convert!to integer}
 
-using namespace std;
+The next task is to convert the numbers in the file from strings to
+integers.  When people write large numbers, they often use commas to
+group the digits, as in 1,750.  Most of the time when computers write
+large numbers, they don't include commas, and the built-in functions
+for reading numbers usually can't handle them.  That makes the
+conversion a little more difficult, but it also provides an
+opportunity to write a comma-stripping function, so that's ok.  Once
+we get rid of the commas, we can use the library function {\tt atoi}
+to convert to integer.  {\tt atoi} is defined in the header file {\tt
+cstdlib}.
 
-struct Time {
-  int hour, minute;
-  double second;
-};
+\index{character!classification}
+\index{isdigit}
 
+To get rid of the commas, one option is to traverse the string and
+check whether each character is a digit.  If so, we add it to the
+result string.  At the end of the loop, the result string contains all
+the digits from the original string, in order.
 
-void printTime (Time& t) {
-  cout << t.hour << ":" << t.minute << ":" << t.second << endl;
-  cout << "Time is " << t.hour << " hour " << t.minute << " minutes " << t.second << "  seconds  "<<endl;
-}
-
-
-int main ()
+\begin{lstlisting}
+int convertToInt (string s)
 {
- Time time = { 11, 59, 3.14159 };
- printTime(time);
- 
- return 0;
-}
-\end{verbatim}
-%
+  string digitString = "";
 
-\section{Functions for objects}
-\label{objectops}
-\index{object}
-\index{function!for objects}
-
-In the next few
-sections, I will demonstrate several possible interfaces for
-functions that operate on objects.  For some operations, you will have a
-choice of several possible interfaces, so you should consider the pros
-and cons of each of these:
-
-\begin{description}
-
-\item[pure function:]  Takes objects and/or basic types as
-arguments but does not modify the objects.  The return value is
-either a basic type or a new object created inside the function.
-
-\item[modifier:]  Takes objects as parameters and modifies some
-or all of them.  Often returns void. \index{void}
-
-\item[fill-in function:]  One of the parameters is an ``empty''
-object that gets filled in by the function.  Technically, this is
-a type of modifier.
-
-\end{description}
-
-\section{Pure functions}
-\index{pure function}
-\index{function}
-\index{function!pure function}
-
-A function is considered a pure function if the result depends only on
-the arguments, and it has no side effects like modifying an argument
-or outputting something.  The only result of calling a pure function is
-the return value.
-
-One example is {\tt after}, which compares two {\tt Time}s and
-returns a {\tt bool} that indicates whether the first operand
-comes after the second:
-
-\begin{verbatim}
-bool after (Time& time1, Time& time2) {
-  if (time1.hour > time2.hour) return true;
-  if (time1.hour < time2.hour) return false;
-
-  if (time1.minute > time2.minute) return true;
-  if (time1.minute < time2.minute) return false;
-
-  if (time1.second > time2.second) return true;
-  return false;
-}
-\end{verbatim}
-%
-What is the result of this function if the two times are equal?  Does
-that seem like the appropriate result for this function?  If you were
-writing the documentation for this function, would you mention that case
-specifically?
-
-A second example is {\tt addTime}, which calculates the sum of two
-times.  For example, if it is {\tt 9:14:30}, and your breadmaker takes
-3 hours and 35 minutes, you could use {\tt addTime} to figure out when
-the bread will be done.
-
-Here is a rough draft of this function that is not quite right:
-
-\begin{verbatim}
-Time addTime (Time& t1, Time& t2) {
-  Time sum;
-  sum.hour = t1.hour + t2.hour;
-  sum.minute = t1.minute + t2.minute;
-  sum.second = t1.second + t2.second;
-  return sum;
-}
-\end{verbatim}
-%
-Here is an example of how to use this function.  If {\tt currentTime}
-contains the current time and {\tt breadTime} contains the amount
-of time it takes for your breadmaker to make bread, then you
-could use {\tt addTime} to figure out when the bread will be
-done.
-
-\begin{verbatim}
-  Time currentTime = { 9, 14, 30.0 };
-  Time breadTime = { 3, 35, 0.0 };
-  Time doneTime = addTime (currentTime, breadTime);
-  printTime (doneTime);
-\end{verbatim}
-%
-The output of this program is {\tt 12:49:30}, which is
-correct.  On the other hand, there are cases where the result
-is not correct.  Can you think of one?
-
-The problem is that this function does not deal with cases
-where the number of seconds or minutes adds up to more than
-60.  When that happens we have to ``carry'' the extra seconds
-into the minutes column, or extra minutes into the hours
-column.
-
-Here's a second, corrected version of this function.
-
-\begin{verbatim}
-Time addTime (Time& t1, Time& t2) {
-  Time sum;
-  sum.hour = t1.hour + t2.hour;
-  sum.minute = t1.minute + t2.minute;
-  sum.second = t1.second + t2.second;
-
-  if (sum.second >= 60.0) {
-    sum.second -= 60.0;
-    sum.minute += 1;
+  for (int i=0; i<s.length(); i++) {
+    if (isdigit (s[i])) {
+      digitString += s[i];
+    }
   }
-  if (sum.minute >= 60) {
-    sum.minute -= 60;
-    sum.hour += 1;
-  }
-  return sum;
+  return atoi (digitString.c_str());
 }
-\end{verbatim}
+\end{lstlisting}
 %
-Although it's correct, it's starting to get big.  Later,
-I will suggest an alternate approach to this problem that
-will be much shorter.
+The variable {\tt digitString} is an example of an {\bf accumulator}.  It is
+similar to the counter we saw in Section~\ref{loopcount},
+except that instead of getting incremented, it gets accumulates
+one new character at a time, using string concatentation.
 
-\index{increment}
-\index{decrement}
-\index{operator!increment}
-\index{operator!decrement}
+The expression
 
-This code demonstrates two operators we have not seen before, {\tt +=}
-and {\tt -=}.  These operators provide a concise way to increment and
-decrement variables.  For example, the statement {\tt sum.second -=
-60.0;} is equivalent to {\tt sum.second = sum.second - 60;}
-
-\section{{\tt const} parameters}
-
-You might have noticed that the parameters for {\tt after}
-and {\tt addTime} are being passed by reference.  Since
-these are pure functions, they do not modify the parameters
-they receive, so I could just as well have passed them by
-value.
-
-The advantage of passing by value is that the calling function
-and the callee are appropriately encapsulated---it is not possible
-for a change in one to affect the other, except by affecting
-the return value.
-
-On the other hand, passing by reference usually is more efficient,
-because it avoids copying the argument.  Furthermore, there is a nice
-feature in C++, called {\tt const}, that can make reference parameters
-just as safe as value parameters.
-
-If you are writing a function and you do not intend to modify
-a parameter, you can declare that it is a {\bf constant
-reference parameter}.  The syntax looks like this:
-
-\begin{verbatim}
-void printTime (const Time& time) ...
-Time addTime (const Time& t1, const Time& t2) ...
-\end{verbatim}
+\begin{lstlisting}
+      digitString += s[i];
+\end{lstlisting}
 %
-I've included only the first line of the functions.  If you tell
-the compiler that you don't intend to change a
-parameter, it can help remind you.  If you try to change one,
-you should get a compiler error, or at least a warning.
+is equivalent to
+
+\begin{lstlisting}
+      digitString = digitString + s[i];
+\end{lstlisting}
+%
+Both statements add a single character onto the end of the existing
+string.
+
+\index{concatentation}
+\index{string!concatentation}
+\index{accumulator}
+\index{pattern!accumulator}
+
+Since {\tt atoi} takes a C string as a parameter, we have
+to convert {\tt digitString} to a C string before passing it
+as an argument.
+
+\index{c\_str}
+\index{C string}
+\index{string!native C}
+
+\section {{\tt matrix}}
+\index{matrix}
+\index{matrix}
+
+A {\tt matrix} is a two-dimensional array.  Instead of a length, it has two
+dimensions, rows and columns.
+
+Each element in the matrix is identified by two indices;
+one specifies the row number, the other the column number.
+
+\index{index}
+
+Create a matrix similarly to an array:
+
+\begin{lstlisting}
+  const int MAXROWS=50;
+  const int MAXCOLS=50;
+  int matrix[MAXROWS][MAXCOLS];
+\end{lstlisting}
+%
+This creates an array of integers with MAXROWS rows and MAXCOLS columns.  You can create an array of any of the datatypes we have learned about.  
+
+To access the elements of a matrix, we use the {\tt []} operator
+to specify the row and column:
+
+\begin{lstlisting}
+  matrix[0][0] = 1;
+  matrix[1][2] = 10.0 * m2[0][0];
+\end{lstlisting}
+%
+If we try to access an element that is out of range, the program
+prints an error message and quits.
 
 \index{run-time error}
-\index{error!run-time}
 
-\section{Modifiers}
-\index{modifier}
-\index{function!modifier}
+Remember that the row indices run from 0 to
+{\tt MAXROWS -1} and the column indices run from 0 to
+{\tt MAXCOLS -1}.
 
-Of course, sometimes you {\em want} to modify one of the
-arguments.  Functions that do are called modifiers.
+\index{loop!nested}
 
-As an example of a modifier, consider {\tt increment},
-which adds a given number of seconds to a {\tt Time} object.
-Again, a rough draft of this function looks like:
+The usual way to traverse a matrix is with a nested loop.
+This loop sets each element of the matrix to the sum of its
+two indices:
+
+\begin{lstlisting}
+  for (int row=0; row < MAXROWS; row++) {
+    for (int col=0; col < MAXCOLS; col++) {
+      matrix[row][col] = row + col;
+    }
+  }
+\end{lstlisting}
+%
+This loop prints each row of the matrix with tabs between the
+elements and newlines between the rows:
+
+\begin{lstlisting}
+  for (int row=0; row < MAXROWS; row++) {
+    for (int col=0; col < MAXCOLS; col++) {
+      cout << matrix[row][col] << "\t";
+    }
+    cout << endl;
+  }
+\end{lstlisting}
+%
+
+\section{A distance matrix}
+
+Finally, we are ready to put the data from the file into
+a matrix.  Specifically, the matrix will have one row and
+one column for each city.
+
+We'll create the matrix in {\tt main}, with plenty of space
+to spare:
+
+\begin{lstlisting}
+  int distances [MAXROWS][MAXCOLS];
+\end{lstlisting}
+%
+
+Next we add new information to the
+matrix by using the indices of the two cities:
+
+\begin{lstlisting}
+void addDataToMatrix(string city1, string city2, string distString, string cityArr[],int &numCities, int distances[][MAXCOLS]){
+    //this find is adapted from the chapter 7 version
+    int index1 = find(cityArr,city1,numCities);
+    if (index1<0){ //city not found
+        index1=numCities;
+        cityArr[numCities++]=city1;
+    }
+    int index2=find(cityArr,city2,numCities);
+    if (index2<0){ //city not found
+        index2=numCities;
+        cityArr[numCities++]=city2;
+    }
+    int dist = convertToInt (distString);
+    distances[index1][index2] = dist;
+    distances[index2][index1] = dist;
+}
+\end{lstlisting}
+%
+Finally, in {\tt main} we can print the information in a
+human-readable form:
+
+\begin{lstlisting}
+for (int i=0; i<numCities; i++) {
+     for (int j=-1; j<=i; j++) {
+         if (j<0){
+             cout<<cityArr[i]<<"\t";
+         } else {
+             cout << distances[i][j] << "\t";
+         }
+    }
+    cout << endl;
+}
+cout<<"\t";
+for (int i=0; i<numCities; i++){
+    cout<<cityArr[i]<<"\t";
+}
+cout << endl;
+\end{lstlisting}
+%
+This code produces the output shown at the beginning of the
+chapter.  The original data is available from this book's github page.
+
+\section{A proper distance matrix}
+
+Although this code works, it is not as well organized as it
+could be, once we learn about vectors and objects, we might be able to improve upon this early prototype.  
+
+\section{Another type of Stream}
+\index{stringstream}
+\index{stringstream}
+
+A {\tt stringstream} is another way to move data in your program.  Like the other streams we have learned, it works with both the {\tt >>} operator
+and the {\tt getline} function.  You will often use this in conjunction with an {\tt ifstream} to help parse your data.  Let's say it looks like the following table where each line is a different person's data, but you don't know how much data is on each line. 
+\index{stringstream}
 
 \begin{verbatim}
-void increment (Time& time, double secs) {
-  time.second += secs;
-
-  if (time.second >= 60.0) {
-    time.second -= 60.0;
-    time.minute += 1;
-  }
-  if (time.minute >= 60) {
-    time.minute -= 60;
-    time.hour += 1;
-  }
-}
+hgt:170 eye:blue age:23 
+hgt:165 age:45
+hgt:200 eye:amber age:31 wgt:200
 \end{verbatim}
-%
-The first line performs the basic operation; the remainder
-deals with the special cases we saw before.
 
-Is this function correct?  What happens if the argument {\tt secs}
-is much greater than 60?  In that case, it is not enough to
-subtract 60 once; we have to keep doing it until {\tt second}
-is below 60.  We can do that by replacing the {\tt if}
-statements with {\tt while} statements:
+You could read and print the data for each person like so:
+\lstinputlisting{../code/cha9/cha9.cpp}
 
-\begin{verbatim}
-void increment (Time& time, double secs) {
-  time.second += secs;
-
-  while (time.second >= 60.0) {
-    time.second -= 60.0;
-    time.minute += 1;
-  }
-  while (time.minute >= 60) {
-    time.minute -= 60;
-    time.hour += 1;
-  }
-}
-\end{verbatim}
-%
-This solution is correct, but not very efficient.
-Can you think of a solution that does not require iteration?
-
-\section{Fill-in functions}
-\index{fill-in function}
-\index{function!fill-in}
-
-Occasionally you will see functions like {\tt addTime} written
-with a different interface (different arguments and return values).
-Instead of creating a new object every time {\tt addTime} is
-called, we could require the caller to provide an ``empty''
-object where {\tt addTime} can store the result.  Compare
-the following with the previous version:
-
-\begin{verbatim}
-void addTimeFill (const Time& t1, const Time& t2, Time& sum) {
-  sum.hour = t1.hour + t2.hour;
-  sum.minute = t1.minute + t2.minute;
-  sum.second = t1.second + t2.second;
-
-  if (sum.second >= 60.0) {
-    sum.second -= 60.0;
-    sum.minute += 1;
-  }
-  if (sum.minute >= 60) {
-    sum.minute -= 60;
-    sum.hour += 1;
-  }
-}
-\end{verbatim}
-%
-One advantage of this approach is that the caller has the option of
-reusing the same object repeatedly to perform a series of additions.
-This can be slightly more efficient, although it can be confusing
-enough to cause subtle errors.  For the vast majority of programming,
-it is worth a spending a little run time to avoid a lot of debugging
-time.
-
-Notice that the first two parameters can be declared {\tt const},
-but the third cannot.
-
-\section{Which is best?}
-\index{programming style}
-
-Anything that can be done with modifiers and fill-in functions can also
-be done with pure functions.  In fact, there are programming
-languages, called {\bf functional} programming languages, that only
-allow pure functions.  Some programmers believe that programs that use
-pure functions are faster to develop and less error-prone than
-programs that use modifiers.  Nevertheless, there are times when
-modifiers are convenient, and cases where functional programs
-are less efficient.
-
-In general, I recommend that you write pure functions whenever
-it is reasonable to do so, and resort to modifiers only if there
-is a compelling advantage.  This approach might be called a
-functional programming style.
-
-\section{Incremental development versus planning}
-\index{incremental development}
-\index{prototyping}
-\index{program development!incremental}
-\index{program development!planning}
-
-In this chapter I have demonstrated an approach to program
-development I refer to as {\bf rapid prototyping with iterative
-improvement}.  In each case, I wrote a rough draft (or prototype)
-that performed the basic calculation, and then tested it on
-a few cases, correcting flaws as I found them.
-
-Although this approach can be effective, it can lead to code
-that is unnecessarily complicated---since it deals with many
-special cases---and unreliable---since it is hard to know if
-you have found all the errors.
-
-An alternative is high-level planning, in which a little insight
-into the problem can make the programming much easier.  In
-this case the insight is that a {\tt Time} is really a three-digit
-number in base 60!  The {\tt second} is the ``ones column,''
-the {\tt minute} is the ``60's column'', and the {\tt hour}
-is the ``3600's column.''
-
-When we wrote {\tt addTime} and {\tt increment}, we were effectively
-doing addition in base 60, which is why we had to ``carry'' from one
-column to the next.
-
-\index{arithmetic!base 60}
-\index{arithmetic!floating-point}
-
-Thus an alternate approach to the whole problem is to convert
-{\tt Time}s into {\tt double}s and take advantage of the fact that
-the computer already knows how to do arithmetic with {\tt double}s.
-Here is a function that converts a {\tt Time} into a {\tt double}:
-
-\begin{verbatim}
-double convertToSeconds (const Time& t) {
-  int minutes = t.hour * 60 + t.minute;
-  double seconds = minutes * 60 + t.second;
-  return seconds;
-}
-\end{verbatim}
-%
-Now all we need is a way to convert from a {\tt double}
-to a {\tt Time} object:
-
-\begin{verbatim}
-Time makeTime (double secs) {
-  Time time;
-  time.hour = int (secs / 3600.0);
-  secs -= time.hour * 3600.0;
-  time.minute = int (secs / 60.0);
-  secs -= time.minute * 60;
-  time.second = secs;
-  return time;
-}
-\end{verbatim}
-%
-You might have to think a bit to convince yourself that the technique
-I am using to convert from one base to another is correct.  Assuming
-you are convinced, we can use these functions to rewrite {\tt addTime}:
-
-\begin{verbatim}
-Time addTime (const Time& t1, const Time& t2) {
-  double seconds = convertToSeconds (t1) + convertToSeconds (t2);
-  return makeTime (seconds);
-}
-\end{verbatim}
-%
-This is much shorter than the original version, and it is much easier
-to demonstrate that it is correct (assuming, as usual, that the
-functions it calls are correct).  As an exercise, rewrite {\tt
-increment} the same way.
-
-
-\section{Generalization}
-\index{generalization}
-
-In some ways converting from base 60 to base 10 and back is
-harder than just dealing with times.  Base conversion is more
-abstract; our intuition for dealing with times is better.
-
-But if we have the insight to treat times as base 60 numbers,
-and make the investment of writing the conversion functions
-({\tt convertToSeconds} and {\tt makeTime}), we get
-a program that is shorter, easier to read and debug, and more
-reliable.
-
-It is also easier to add more features later.  For example, imagine
-subtracting two {\tt Time}s to find the duration between them.  The
-naive approach would be to implement subtraction with
-borrowing.  Using the conversion functions would be easier and more
-likely to be correct.
-
-Ironically, sometimes making a problem harder (more general)
-makes is easier (fewer special cases, fewer opportunities for error).
-
-\section{Algorithms}
-\label{algorithm}
-\index{algorithm}
-
-When you write a general solution for a class of problems, as opposed
-to a specific solution to a single problem, you have written an {\bf
-algorithm}.  I mentioned this word in Chapter 1, but did not define it
-carefully.  It is not easy to define, so I will try a couple of
-approaches.
-
-First, consider something that is not an algorithm.
-When you learned to multiply single-digit numbers, you probably
-memorized the multiplication table.  In effect, you memorized 100
-specific solutions.  That kind of knowledge is not really algorithmic.
-
-But if you were ``lazy,'' you probably cheated by learning a few
-tricks.  For example, to find the product of $n$ and 9, you can write
-$n-1$ as the first digit and $10-n$ as the second digit.  This trick
-is a general solution for multiplying any single-digit number by 9.
-That's an algorithm!
-
-Similarly, the techniques you learned for addition with carrying,
-subtraction with borrowing, and long division are all algorithms.  One
-of the characteristics of algorithms is that they do not require any
-intelligence to carry out.  They are mechanical processes in which
-each step follows from the last according to a simple set of rules.
-
-In my opinion, it is embarrassing that humans spend so much time in
-school learning to execute algorithms that, quite literally, require
-no intelligence.
-
-On the other hand, the process of designing algorithms is interesting,
-intellectually challenging, and a central part of what we call
-programming.
-
-Some of the things that people do naturally, without difficulty
-or conscious thought, are the most difficult to express
-algorithmically.  Understanding natural language is a good
-example.  We all do it, but so far no one has been able to
-explain {\em how} we do it, at least not in the form of an
-algorithm.
-
-Later in this book, you will have the opportunity to design
-simple algorithms for a variety of problems.  If you take
-the next class in the Computer Science sequence, Data Structures,
-you will see some of the most interesting, clever, and
-useful algorithms computer science has produced.
+As you can see, streams can be very useful. 
 
 \section{Glossary}
 
 \begin{description}
 
-\item[instance:]  An example from a category.  My cat is an
-instance of the category ``feline things.''  Every object is
-an instance of some type.
+\item[ordered set:]  A data structure in which every element appears
+only once and every element has an index that identifies it.
 
-\item[instance variable:]  One of the named data items that make
-up an structure.  Each structure has its own copy of
-the instance variables for its type.
+\item[stream:]  A data structure that represents a ``flow'' or
+sequence of data items from one place to another.  In C++ streams
+are used for input and output.
 
-\item[constant reference parameter:]  A parameter that is passed
-by reference but that cannot be modified.
+\item[accumulator:]  A variable used inside a loop to accumulate
+a result, often by getting something added or concatenated during each
+iteration.
 
-\item[pure function:]  A function whose result depends only on its
-parameters, and that has so effects other than returning
-a value.
-
-\item[functional programming style:]  A style of program design
-in which the majority of functions are pure.
-
-\item[modifier:]  A function that changes one or more of the objects
-it receives as parameters, and usually returns {\tt void}.
-
-\item[fill-in function:]  A function that takes an ``empty''
-object as a parameter and fills it its instance variables instead
-of generating a return value.
-
-\item[algorithm:]  A set of instructions for solving a class of
-problems by a mechanical, unintelligent process.
-
-\index{instance}
-\index{instance variable}
-\index{pure function}
-\index{functional programming}
-\index{modifier}
-\index{algorithm}
+\index{ordered set}
+\index{set!ordered}
+\index{stream}
+\index{accumulator}
+\index{pattern!accumulator}
 
 \end{description}
+
 

@@ -1,44 +1,79 @@
-#include <iostream.h>
-#include <stdlib.h>
-#include "apvector.h"
+#include <iostream>
+using std::cout;
+using std::endl;
 
-apvector<int> randomVector (int n) {
-  apvector<int> vec (n);
-  for (int i = 0; i<vec.length(); i++) {
-    vec[i] = random () % 10;
-  }
-  return vec;
-}
+struct Time {
+  int hour, minute;
+  double second;
+};
 
-void printVector (apvector<int> vec) {
-  for (int i = 0; i<vec.length(); i++) {
-    cout << vec[i];
-  }
-}
-
-int howMany (apvector<int> vec, int value) {
-  int count = 0;
-  for (int i=0; i< vec.length(); i++) {
-    if (vec[i] == value) count++;
-  }
-  return count;
-}
-
-void main ()
+void printTime (const Time& time)
 {
-  int numValues = 100000;
+  cout << time.hour << ":" << time.minute << ":" << time.second << endl;
+}
 
-  srandom (17);
-  apvector<int> vector = randomVector (numValues);
-  apvector<int> histogram (10, 0);
+bool after (const Time& time1, const Time& time2)
+{
+  if (time1.hour > time2.hour) return true;
+  if (time1.hour < time2.hour) return false;
 
-  for (int i = 0; i<numValues; i++) {
-    int index = vector[i];
-    histogram[index]++;
+  if (time1.minute > time2.minute) return true;
+  if (time1.minute < time2.minute) return false;
+
+  if (time1.second > time2.second) return true;
+  return false;
+}
+
+void increment (Time& time, double secs)
+{
+  time.second += secs;
+
+  if (time.second >= 60.0) {
+    time.second -= 60.0;
+    time.minute += 1;
   }
-
-  for (int i = 0; i<10; i++) {
-    cout << i << "\t" << histogram[i] << endl;
+  if (time.minute >= 60) {
+    time.minute -= 60;
+    time.hour += 1;
   }
+}
 
+double convertToSeconds (const Time& time)
+{
+  int minutes = time.hour * 60 + time.minute;
+  double seconds = minutes * 60 + time.second;
+  return seconds;
+}
+
+Time makeTime (double secs)
+{
+  Time time;
+  time.hour = (int) (secs / 3600.0);
+  secs -= time.hour * 3600.0;
+  time.minute = (int) (secs / 60.0);
+  secs -= time.minute * 60;
+  time.second = secs;
+  return time;
+}
+
+Time addTime (const Time& t1, const Time& t2)
+{
+  double seconds = convertToSeconds (t1) + convertToSeconds (t2);
+  return makeTime (seconds);
+}
+
+int main ()
+{
+  Time currentTime = { 9, 14, 30.0 };
+  increment (currentTime, 500.0);
+  printTime (currentTime);
+
+  Time breadTime = { 3, 35, 0.0 };
+  Time doneTime = addTime (currentTime, breadTime);
+  printTime (doneTime);
+
+  if (after (doneTime, currentTime)) {
+    cout << "The bread will be done after it starts." << endl;
+  }
+  return 0;
 }

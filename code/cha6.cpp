@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cmath>
+using std::cout;
+using std::endl;
 
 void countdown (int n) {
   while (n > 0) {
@@ -15,7 +17,7 @@ void printMultiples (int n, int high) {
   while (i <= high) {
     cout << n*i << "   ";
     i = i + 1;
-  }    
+  }
   cout << endl;
 }
 
@@ -27,8 +29,11 @@ void printMultTable (int high) {
   }
 }
 
-void main ()
+int main ()
 {
-  printMultTable (7);
-}
+  countdown(3);
 
+  printMultTable (7);
+
+  return 0;
+}

@@ -6,6 +6,36 @@
 \usepackage{epsfig}
 \usepackage{makeidx}
 \usepackage{url}
+\usepackage{color}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\usepackage{listings}
+\lstset{frame=tb,
+   language=C++,
+   aboveskip=3mm,
+   belowskip=3mm,
+   showstringspaces=false,
+   columns=flexible,
+   basicstyle={\small\ttfamily},
+   numbers=none,%left,
+   numberstyle=\tiny\color{gray},
+   keywordstyle=\color{blue},
+   commentstyle=\color{dkgreen},
+   stringstyle=\color{mauve},
+   breaklines=true,
+   frame=none,
+   breakatwhitespace=true,
+   tabsize=3
+   }
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
 \pssilent
 
 \title{Think C++}
@@ -23,8 +53,8 @@
 \begin{document}
 
 \title {Think C++}
-\author {Allen B. Downey}
-\date {Version 1.1.0}
+\author {Allen B. Downey \\ adapted for CISP 360 by \\ James R. Town}
+\date {Version 1.1.361}
 \maketitle
 
 \vspace{2in}
@@ -77,9 +107,6 @@ https://github.com/AllenDowney/ThinkCPP
 \include{cha13}
 \include{cha14}
 \include{cha15}
-
-\appendix
-\include{app1}
 
 \printindex
 

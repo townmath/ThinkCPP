@@ -22,23 +22,13 @@ accurately.  As it turns out, the process of learning to program is an
 excellent opportunity to practice problem-solving skills.  That's why
 this chapter is called ``The way of the program.''
 
-Of course, the other goal of this book is to prepare you for the
-Computer Science AP Exam.  We may not take the most direct approach
-to that goal, though.  For example, there are not many exercises in
-this book that are similar to the AP questions.  On the other hand,
-if you understand the concepts in this book, along with the details
-of programming in C++, you will have all the tools you need to
-do well on the exam.
-
 \section{What is a programming language?}
 \index{programming language}
 \index{language!programming}
 
-The programming language you will be learning is C++, because that is
-the language the AP exam is based on, as of 1998.  Before that, the
-exam used Pascal.  Both C++ and Pascal are {\bf high-level languages};
+The programming language you will be learning is C++.  C++ is a {\bf high-level language};
 other high-level languages you might have heard of are Java, C and
-FORTRAN.
+Python.
 
 As you might infer from the name ``high-level language,'' there are
 also {\bf low-level languages}, sometimes referred to as machine
@@ -192,7 +182,22 @@ error.  So does this one
 
 For most readers, a few syntax errors are not a significant
 problem, which is why we can read the poetry of e e cummings
-without spewing error messages.
+without spewing error messages.\
+\\
+"Tumbling Hair" by e e cummings from {\em Eight Harvard Poets}:
+\begin{verbatim}
+  Tumbling-hair
+                picker of buttercups
+                                     violets
+  dandelions
+  And the big bullying daisies
+                              through the field wonderful
+  with eyes a little sorry
+  Another comes
+                also picking flowers
+\end{verbatim}
+
+\index{cummings, e e}
 
 Compilers are not so forgiving.  If there is a single syntax
 error anywhere in your program, the compiler will print an
@@ -290,7 +295,7 @@ and other programming practices.
 \index{language!natural}
 
 {\bf Natural languages} are the languages that people speak,
-like English, Spanish, and French.  They were not designed
+like English, Spanish, and Chinese.  They were not designed
 by people (although people try to impose some order on them);
 they evolved naturally.
 
@@ -410,18 +415,7 @@ Traditionally the first program people write in a new language
 is called ``Hello, World.'' because all it does is print the
 words ``Hello, World.''  In C++, this program looks like this:
 
-\begin{verbatim}
-#include <iostream>
-using namespace std;
-
-// main: generate some simple output
-
-int main ()
-{
-  cout << "Hello, world." << endl;
-  return 0;
-}
-\end{verbatim}
+\lstinputlisting{../code/cha1.cpp}
 %
 Some people judge the quality of a programming language by
 the simplicity of the ``Hello, World.'' program.  By this

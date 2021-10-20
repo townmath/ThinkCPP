@@ -1,12 +1,14 @@
 #include <iostream>
 #include <cmath>
+using std::endl;
+using std::cout;
 
 double pi = acos (-1);
 
 double absoluteValue (double x) {
   if (x < 0) {
     return -x;
-  } else if (x >= 0) {
+  } else { //if (x >= 0)
     return x;
   }
 }
@@ -45,7 +47,7 @@ int factorial (int n)
   }
 }
 
-void main ()
+int main ()
 {
   bool fred;
   fred = true;
@@ -56,7 +58,10 @@ void main ()
 
   cout << isSingleDigit (2) << endl;
   bool bigFlag = !isSingleDigit (17);
-
+  cout << bigFlag << endl;
+    
   cout << factorial (3) << endl;
+    
+  return 0;
 }
 
