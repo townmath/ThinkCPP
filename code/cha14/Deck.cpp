@@ -48,7 +48,7 @@ int randomInt (int low, int high)
 void Deck::shuffle ()
 {
   for (int i=0; i<cards.size(); i++) {
-    int j = randomInt (i, 51);
+    int j = randomInt (i, cards.size()-1);
     swapCards (i, j);
   }
 }
@@ -68,7 +68,7 @@ int Deck::findLowestCard (int low, int high) const
 void Deck::sort ()
 {
   for (int i=0; i<cards.size(); i++) {
-    int j = findLowestCard (i, 51);
+    int j = findLowestCard (i, cards.size()-1);
     swapCards (i, j);
   }
 }

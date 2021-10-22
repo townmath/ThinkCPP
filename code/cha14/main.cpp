@@ -36,11 +36,11 @@ int findBisect (const Card& card, const Deck& deck,
 int main ()
 {
   Deck deck;
-  deck.shuffle ();
+  deck.shuffle();
   //deck.print ();//test shuffle
 
   Deck hand1 = deck.subdeck (0, 4);
-  hand1.print ();//test hand
+  hand1.print();//test hand
   //Deck hand2 = deck.subdeck (5, 9);
   //Deck pack = deck.subdeck (10, 51);
 
