@@ -2,528 +2,603 @@
 % Copyright (C) 1999  Allen B. Downey
 
 
-\chapter{File Input/Output and 2D Arrays}
 
-In this chapter we will develop a program that reads and writes files,
-parses input, and demonstrates 2D Arrays.  We will also
-implement a data structure called {\tt Set} that expands automatically
-as you add elements.
+\chapter{Structures}
+\label{structs}
+\index{struct}
 
-Aside from demonstrating all these features, the real purpose of the
-program is to generate a two-dimensional table of
-the distances between cities in the United States.
-The output is a table that looks like this:
+\section{Compound values}
 
-\begin{verbatim}
-Atlanta 0
-Chicago 700     0
-Boston  1100    1000    0
-Dallas  800     900     1750    0
-Denver  1450    1000    2000    800     0
-Detroit 750     300     800     1150    1300    0
-Orlando 400     1150    1300    1100    1900    1200    0
-Phoenix 1850    1750    2650    1000    800     2000    2100    0
-Seattle 2650    2000    3000    2150    1350    2300    3100    1450    0
-        Atlanta Chicago Boston  Dallas  Denver  Detroit Orlando Phoenix Seattle
-\end{verbatim}
-%
-The diagonal elements are all zero because that is the distance
-from a city to itself.  Also, because
-the distance from A to B is the same as the distance from B
-to A, there is no need to print the top half of the matrix.
+Most of the data types we have been working with represent a single
+value---an integer, a floating-point number, a boolean value.  {\tt
+string}s are different in the sense that they are made up of smaller
+pieces, the characters.  Thus, {\tt string}s are an example of a
+{\bf compound} type.
 
-\section {Streams}
-\index{stream}
+Depending on what we are doing, we may want to treat a compound type
+as a single thing (or object), or we may want to access its parts (or
+instance variables).  This ambiguity is useful.
 
-To get input from a file or send output to a file, you have to
-create an {\tt ifstream} object (for input files) or an
-{\tt ofstream} object (for output files).  These objects
-are defined in the header file {\tt fstream}, which you
-have to include.
+It is also useful to be able to create your own compound values.  C++
+provides two mechanisms for doing that: {\bf structures} and {\bf
+classes}.  We will start out with structures and get to classes in
+Chapter~\ref{class} (there is not much difference between them).
 
-\index{header file}
+\section{{\tt Point} objects}
+\index{Point}
+\index{struct!Point}
 
-A {\bf stream} is an abstract object that represents the flow
-of data from a source like the keyboard or a file to a destination
-like the screen or a file.
+As a simple example of a compound structure, consider the concept of a
+mathematical point.  At one level, a point is two numbers
+(coordinates) that we treat collectively as a single object.  In
+mathematical notation, points are often written in parentheses, with a
+comma separating the coordinates.  For example, $(0, 0)$ indicates the
+origin, and $(x, y)$ indicates the point $x$ units to the right and
+$y$ units up from the origin.
 
-We have already worked with two streams: {\tt cin}, which has type
-{\tt istream}, and {\tt cout}, which has type {\tt ostream}.
-{\tt cin} represents the flow of data from the keyboard to
-the program.  Each time the program uses the {\tt >>} operator
-or the {\tt getline} function, it removes a piece of data
-from the input stream.
-
-\index{cin}
-\index{cout}
-\index{istream}
-\index{ostream}
-
-Similarly, when the program uses the {\tt <<} operator on
-an {\tt ostream}, it adds a datum to the outgoing stream.
-
-\section {File input}
-\label{finput}
-\index{file!input}
-\index{ifstream}
-
-To get data from a file, we have to create a stream that flows
-from the file into the program.  
-We can do that using the {\tt ifstream} constructor.
+A natural way to represent a point in C++ is with two {\tt double}s.
+The question, then, is how to group these two values into
+a compound object, or structure.  The answer is a {\tt struct}
+definition:
 
 \begin{lstlisting}
-  ifstream infile ("file-name");
+struct Point {
+  double x, y;
+};  
 \end{lstlisting}
 %
-The argument for this constructor is a string that
-contains the name of the file you want to open.  The result
-is an object named {\tt infile} that supports all the same
-operations as {\tt cin}, including {\tt >>} and {\tt getline}.
+{\tt struct} definitions appear outside of any function definition,
+usually at the beginning of the program (after the {\tt include}
+statements).
+
+This definition indicates that there are two elements in this
+structure, named {\tt x} and {\tt y}.  These elements are called
+{\bf instance variables}, for reasons I will explain a little
+later.
+
+It is a common error to leave off the semi-colon at the end of a
+structure definition.  It might seem odd to put a semi-colon after a
+squiggly-brace, but you'll get used to it.
+
+Once you have defined the new structure, you can create variables
+with that type:
+
+\begin{lstlisting}
+  Point blank;
+  blank.x = 3.0;
+  blank.y = 4.0;   
+\end{lstlisting}
+%
+The first line is a conventional variable declaration: {\tt blank} has
+type {\tt Point}.  The next two lines initialize the instance variables of the
+structure.  The ``dot notation'' used here is similar to the syntax
+for invoking a function on an object, as in {\tt fruit.length()}.
+Of course, one difference is that function names are always followed
+by an argument list, even if it is empty.
+
+\index{declaration}
+\index{statement!declaration}
+\index{reference}
+\index{state diagram}
+\index{state}
+
+The result of these assignments is shown in the following
+state diagram:
+
+\vspace{0.1in}
+\centerline{\epsfig{figure=point.eps}}
+\vspace{0.1in}
+
+As usual, the name of the variable {\tt blank} appears outside the box
+and its value appears inside the box.  In this case, that value is
+a compound object with two named instance variables.
+
+\section{Accessing instance variables}
+\index{struct!instance variable}
+
+You can read the values of an instance variable using the same syntax we
+used to write them:
+
+\begin{lstlisting}
+    int x = blank.x;
+\end{lstlisting}
+%
+The expression {\tt blank.x} means ``go to the object named {\tt
+blank} and get the value of {\tt x}.''  In this case we assign that
+value to a local variable named {\tt x}.  Notice that there is no
+conflict between the local variable named {\tt x} and the instance
+variable named {\tt x}.  The purpose of dot notation is to identify
+{\em which} variable you are referring to unambiguously.
+
+You can use dot notation as part of any C++ expression, so the
+following are legal.
+
+\begin{lstlisting}
+  cout << blank.x << ", " << blank.y << endl;
+  double distance = blank.x * blank.x + blank.y * blank.y;
+\end{lstlisting}
+%
+The first line outputs {\tt 3, 4}; the second line calculates
+the value 25.
+
+\section{Operations on structures}
+\index{struct!operations}
+
+Most of the operators we have been using on other types, like
+mathematical operators ( {\tt +}, {\tt \%}, etc.) and comparison
+operators ({\tt ==}, {\tt >}, etc.), do not work on structures.
+Actually, it is possible to define the meaning of these operators
+for the new type, but we won't do that in this book.
+
+On the other hand, the assignment operator {\em does} work for
+structures.  It can be used in two ways: to initialize the instance
+variables of a structure or to copy the instance variables from one
+structure to another.  An initialization looks like this:
+
+\begin{lstlisting}
+  Point blank = { 3.0, 4.0 };
+\end{lstlisting}
+%
+The values in squiggly braces get assigned to the instance variables of
+the structure one by one, in order.  So in this case, {\tt x}
+gets the first value and {\tt y} gets the second.
+
+Unfortunately, this syntax can be used only in an initialization,
+not in an assignment statement.  So the following is illegal.
+
+\begin{lstlisting}
+  Point blank;
+  blank = { 3.0, 4.0 };       // WRONG !!
+\end{lstlisting}
+%
+You might wonder why this perfectly reasonable statement should
+be illegal; I'm not sure, but I think the problem is that the compiler
+doesn't know what type the right hand side should be.  If you
+add a typecast:
+
+\begin{lstlisting}
+  Point blank;
+  blank = (Point){ 3.0, 4.0 };
+\end{lstlisting}
+%
+That works.
+
+It is legal to assign one structure to
+another.  For example:
+
+\begin{lstlisting}
+  Point p1 = { 3.0, 4.0 };
+  Point p2 = p1;
+  cout << p2.x << ", " <<  p2.y << endl;
+\end{lstlisting}
+%
+The output of this program is {\tt 3, 4}.
+
+\section{Structures as parameters}
+\index{parameter}
+\index{struct!as parameter}
+
+You can pass structures as parameters in the usual way.  For
+example,
+
+\begin{lstlisting}
+void printPoint (Point p) {
+  cout << "(" << p.x << ", " << p.y << ")" << endl;
+}
+\end{lstlisting}
+%
+{\tt printPoint} takes a point as an argument and outputs it in
+the standard format.  If you call {\tt printPoint (blank)},
+it will output {\tt (3, 4)}.
+
+As a second example, we can rewrite the {\tt distance} function from
+Section~\ref{distance} so that it takes two {\tt Point}s as parameters
+instead of four {\tt double}s.
+
+\begin{lstlisting}
+double distance (Point p1, Point p2) {
+  double dx = p2.x - p1.x;
+  double dy = p2.y - p1.y;
+  return sqrt (dx*dx + dy*dy);
+}
+\end{lstlisting}
+
+\section{Call by value}
+\index{parameter passing}
+\index{call by value}
+
+When you pass a structure as an argument, remember that the
+argument and the parameter are not the same variable.  Instead,
+there are two variables (one in the caller and one in the
+callee) that have the same value, at least initially.  For
+example, when we call {\tt printPoint}, the stack diagram
+looks like this:
+
+\vspace{0.1in}
+\centerline{\epsfig{figure=point2.eps}}
+\vspace{0.1in}
+%
+If {\tt printPoint} happened to change one of the instance variables
+of {\tt p}, it would have no effect on {\tt blank}.  Of course, there
+is no reason for {\tt printPoint} to modify its parameter, so this
+isolation between the two functions is appropriate.
+
+This kind of parameter-passing is called ``pass by value''
+because it is the value of the structure (or other type) that
+gets passed to the function.
+
+\section{Call by reference}
+\index{parameter passing}
+\index{call by reference}
+\index{reference}
+
+An alternative parameter-passing mechanism that is available
+in C++ is called ``pass by reference.''  This mechanism makes
+it possible to pass a structure to a procedure and modify it.
+
+For example, you can reflect a point around the 45-degree line by
+swapping the two coordinates.  The most obvious (but incorrect) way to
+write a {\tt reflect} function is something like this:
+
+\begin{lstlisting}
+void reflect (Point p)      // WRONG !!
+{
+  double temp = p.x;
+  p.x = p.y;
+  p.y = temp;
+}
+\end{lstlisting}
+%
+But this won't work, because the changes we make in {\tt reflect}
+will have no effect on the caller.
+
+Instead, we have to specify that we want to pass the parameter by
+reference.  We do that by adding an ampersand ({\tt \&}) to the
+parameter declaration:
+
+\begin{lstlisting}
+void reflect (Point& p)
+{
+  double temp = p.x;
+  p.x = p.y;
+  p.y = temp;
+}
+\end{lstlisting}
+%
+Now we can call the function in the usual way:
+
+\begin{lstlisting}
+  printPoint (blank);
+  reflect (blank);
+  printPoint (blank);
+\end{lstlisting}
+%
+The output of this program is as expected:
+
+\begin{lstlisting}
+(3, 4)
+(4, 3)
+\end{lstlisting}
+%
+Here's how we would draw a stack diagram for this program:
+
+\vspace{0.1in}
+\centerline{\epsfig{figure=point3.eps}}
+\vspace{0.1in}
+%
+The parameter {\tt p} is a reference to the structure named {\tt
+blank}.  The usual representation for a reference is a dot with an
+arrow that points to whatever the reference refers to.
+
+The important thing to see in this diagram is that any changes that
+{\tt reflect} makes in {\tt p} will also affect {\tt blank}.
+
+Passing structures by reference is more versatile than passing by
+value, because the callee can modify the structure.  It is also
+faster, because the system does not have to copy the whole
+structure.  On the other hand, it is less safe, since it is harder to
+keep track of what gets modified where.  Nevertheless, in C++
+programs, almost all structures are passed by reference almost all the
+time.  In this book I will follow that convention.
+
+
+\section{Rectangles}
+\index{Rectangle}
+\index{struct!Rectangle}
+
+Now let's say that we want to create a structure to represent
+a rectangle.  The question is, what information do I have to
+provide in order to specify a rectangle?  To keep things simple
+let's assume that the rectangle will be oriented vertically or
+horizontally, never at an angle.
+
+There are a few possibilities: I could specify the center of
+the rectangle (two coordinates) and its size (width and height),
+or I could specify one of the corners and the size, or I
+could specify two opposing corners.
+
+The most common choice in existing programs is to specify the
+upper left corner of the rectangle and the size.  To do that
+in C++, we will define a structure that contains a {\tt Point}
+and two doubles.
+
+\begin{lstlisting}
+struct Rectangle {
+  Point corner;
+  double width, height;
+};  
+\end{lstlisting}
+%
+Notice that one structure can contain another.  In fact, this
+sort of thing is quite common.  Of course, this means that in
+order to create a {\tt Rectangle}, we have to create a {\tt Point}
+first:
+
+\begin{lstlisting}
+  Point corner = { 0.0, 0.0 };
+  Rectangle box = { corner, 100.0, 200.0 };
+\end{lstlisting}
+%
+This code creates a new {\tt Rectangle} structure and initializes the
+instance variables.  The figure shows the effect of this assignment.
+
+\vspace{0.1in}
+\centerline{\epsfig{figure=rectangle.eps}}
+\vspace{0.1in}
+%
+We can access the {\tt width} and {\tt height} in the usual way:
+
+\begin{lstlisting}
+  box.width += 50.0;
+  cout << box.height << endl;
+\end{lstlisting}
+%
+In order to access the instance variables of {\tt corner}, we can use a
+temporary variable:
+
+\begin{lstlisting}
+  Point temp = box.corner;
+  double x = temp.x;
+\end{lstlisting}
+%
+Alternatively, we can compose the two statements:
+
+\index{composition}
+
+\begin{lstlisting}
+  double x = box.corner.x;
+\end{lstlisting}
+%
+It makes the most sense to read this statement from right to
+left: ``Extract {\tt x} from the {\tt corner} of the {\tt box},
+and assign it to the local variable {\tt x}.''
+
+While we are on the subject of composition, I should point
+out that you can, in fact, create the {\tt Point} and the
+{\tt Rectangle} at the same time:
+
+\begin{lstlisting}
+  Rectangle box = { { 0.0, 0.0 }, 100.0, 200.0 };
+\end{lstlisting}
+%
+The innermost squiggly braces are the coordinates of the
+corner point; together they make up the first of the three
+values that go into the new {\tt Rectangle}.  This statement
+is an example of {\bf nested structure}.
+
+\index{nested structure}
+
+
+\section{Structures as return types}
+\index{struct!as return type}
+\index{return}
+\index{statement!return}
+
+You can write functions that return structures.  For example,
+{\tt findCenter} takes a {\tt Rectangle} as an argument and
+returns a {\tt Point} that contains the coordinates of the
+center of the {\tt Rectangle}:
+
+\begin{lstlisting}
+Point findCenter (Rectangle& box)
+{
+  double x = box.corner.x + box.width/2;
+  double y = box.corner.y + box.height/2;
+  Point result = {x, y};
+  return result;
+}
+\end{lstlisting}
+%
+To call this function, we have to pass a box as an argument
+(notice that it is being passed by reference), and assign the
+return value to a {\tt Point} variable:
+
+\begin{lstlisting}
+  Rectangle box = { {0.0, 0.0}, 100, 200 };
+  Point center = findCenter (box);
+  printPoint (center);
+\end{lstlisting}
+%
+The output of this program is {\tt (50, 100)}.
+
+\section {Passing other types by reference}
+\index{parameter passing}
+\index{call by reference}
+\index{reference}
+
+It's not just structures that can be passed by reference.
+All the other types we've seen can, too.  For example, to swap
+two integers, we could write something like:
+
+\begin{lstlisting}
+void swap (int& x, int& y)
+{
+  int temp = x;
+  x = y;
+  y = temp;
+}
+\end{lstlisting}
+%
+We would call this function in the usual way:
+
+\begin{lstlisting}
+  int i = 7;
+  int j = 9;
+  swap (i, j);
+  cout << i << j << endl;
+\end{lstlisting}
+%
+The output of this program is {\tt 97}.  Draw a stack
+diagram for this program to convince yourself this is true.
+If the parameters {\tt x} and {\tt y} were declared as
+regular parameters (without the {\tt \&}s), {\tt swap} would
+not work.  It would modify {\tt x} and {\tt y} and have no
+effect on {\tt i} and {\tt j}.
+
+When people start passing things like integers by reference,
+they often try to use an expression
+as a reference argument.  For example:
+
+\begin{lstlisting}
+  int i = 7;
+  int j = 9;
+  swap (i, j+1);         // WRONG!!
+\end{lstlisting}
+%
+This is not legal because the expression {\tt j+1} is not
+a variable---it does not occupy a location that the reference
+can refer to.  It is a little tricky to figure out exactly
+what kinds of expressions can be passed by reference.  For now
+a good rule of thumb is that reference arguments have to be
+variables.
+
+\section{Getting user input}
+\label{input}
+\index{input!keyboard}
+
+The programs we have written so far are pretty predictable;
+they do the same thing every time they run.  Most of the time,
+though, we want programs that take input from the user and
+respond accordingly.
+
+There are many ways to get input, including keyboard
+input, mouse movements and button clicks, as well as more exotic
+mechanisms like voice control and retinal scanning.  In this
+text we will consider only keyboard input.
+
+\index{stream}
+\index{cin}
+\index{cout}
+
+In the header file {\tt iostream},
+C++ defines an object named {\tt cin} that handles input in
+much the same way that {\tt cout} handles output.  To get an
+integer value from the user:
 
 \begin{lstlisting}
   int x;
-  string line;
-    
-  infile >> x;               // get a single integer and store in x
-  getline (infile, line);    // get a whole line and store in line
+  cin >> x;
 \end{lstlisting}
 %
-If we know ahead of time how much data is in a file, it is 
-straightforward to write a loop that reads the entire file and
-then stops.  More often, though, we want to read the entire
-file, but don't know how big it is.
+The {\tt >>} operator causes the program to stop executing and
+wait for the user to type something.  If the user types a valid
+integer, the program converts it into an integer value and
+stores it in {\tt x}.
 
-There are member functions for {\tt ifstreams} that check the status
-of the input stream; they are called {\tt good}, {\tt eof}, {\tt fail}
-and {\tt bad}.  We will use {\tt good} to make sure the file was
-opened successfully and {\tt eof} to detect the ``end of file.''
+\index{operator!{\tt >>}}
 
-\index{stream!status}
-\index{good}
-\index{eof}
-\index{end of file}
+If the user types something other than an integer,
+C++ doesn't report an error, or anything sensible like that.
+Instead, it puts some meaningless value in {\tt x} and continues.
 
-Whenever you get data from an input stream, you don't
-know whether the attempt succeeded until you check.  If the
-return value from {\tt eof} is {\tt true} then we have reached
-the end of the file and we know that the last attempt failed.
-Here is a program that reads lines from a file and displays
-them on the screen:
+Fortunately, there is a way to check and see if an input
+statement succeeds.  We can invoke the {\tt good} function on
+{\tt cin} to check what is called the {\bf stream state}.
+{\tt good} returns a {\tt bool}: if true, then the last input
+statement succeeded.  If not, we know that some previous operation
+failed, and also that the next operation will fail.
+
+Thus, getting input from the user might look like this:
+
+\lstinputlisting{../code/cha8/enter_int.cpp}
+%
+{\tt cin} can also be used to input a {\tt string}:
 
 \begin{lstlisting}
-  string fileName = ...;
-  ifstream infile (fileName);
+  string name;
 
-  if (infile.good() == false) {
-    cout << "Unable to open the file named " << fileName;
-    exit (1);
-  }
-
-  while (true) {
-    getline (infile, line);
-    if (infile.eof()) break;
-    cout << line << endl;
-  }
+  cout << "What is your name? ";
+  cin >> name;
+  cout << name << endl;
 \end{lstlisting}
 %
+Unfortunately, this statement only takes the first word of
+input, and leaves the rest for the next input statement.
+So, if you run this program and type your full name, it
+will only output your first name.
 
-Immediately after opening the file, we invoke the {\tt good} function.
-The return value is {\tt false} if the system could not open the file,
-most likely because it does not exist, or you do not have permission
-to read it.
+Because of these problems (inability to handle errors and
+funny behavior), I avoid using the {\tt >>} operator altogether,
+unless I am reading data from a source that is known to be
+error-free.
 
-\index{loop!infinite}
-\index{infinite loop}
-
-The statement {\tt while(true)} is an idiom for an infinite
-loop.  Usually there will be a {\tt break} statement somewhere in
-the loop so that the program does not really run forever (although
-some programs do).  In this case, the {\tt break} statement allows
-us to exit the loop as soon as we detect the end of file.
-
-\index{break statement}
-\index{statement!break}
-\index{getline}
-
-It is important to exit the loop between the input statement and
-the output statement, so that when {\tt getline} fails at the
-end of the file, we do not output the invalid data in {\tt line}.
-
-\section{File output}
-\index{file output}
-\index{ofstream}
-
-Sending output to a file is similar.  For example, we could
-modify the previous program to copy lines from one file to
-another.
+Instead, I use a function in the header {\tt string} called {\tt getline}.
 
 \begin{lstlisting}
-  ifstream infile ("input-file");
-  ofstream outfile ("output-file");
+  string name;
 
-  if (infile.good() == false || outfile.good() == false) {
-    cout << "Unable to open one of the files." << endl;
-    exit (1);
-  }
-
-  while (true) {
-    getline (infile, line);
-    if (infile.eof()) break;
-    outfile << line << endl;
-  }
-\end{lstlisting}
-
-\section{Parsing input}
-\label{parsing}
-\index{parsing}
-
-In Section~\ref{formal} I defined ``parsing'' as the process of
-analyzing the structure of a sentence in a natural language or a
-statement in a formal language.  For example, the compiler has to
-parse your program before it can translate it into machine language.
-
-In addition, when you read input from a file or from the keyboard
-you often have to parse it in order to extract the information
-you want and detect errors.
-
-For example, I have a file called {\tt distances} that contains
-information about the distances between major cities in the
-United States.  I got this information from a randomly-chosen
-web page
-
-\begin{lstlisting}
-http://www.jaring.my/usiskl/usa/distance.html
+  cout << "What is your name? ";
+  getline (cin, name);
+  cout << name << endl;
 \end{lstlisting}
 %
-so it may be wildly inaccurate, but that doesn't matter.  The
-format of the file looks like this:
+The first argument to {\tt getline} is {\tt cin}, which is
+where the input is coming from.  The second argument is the
+name of the {\tt string} where you want the result to be
+stored.
 
-\begin{verbatim}
-"Atlanta"       "Chicago"       700
-"Atlanta"       "Boston"        1,100
-"Atlanta"       "Chicago"       700
-"Atlanta"       "Dallas"        800
-"Atlanta"       "Denver"        1,450
-"Atlanta"       "Detroit"       750
-"Atlanta"       "Orlando"       400
-\end{verbatim}
-%
-Each line of the file contains the names of two cities in quotation
-marks and the distance between them in miles.  The quotation marks
-are useful because they make it easy to deal with names that have
-more than one word, like ``San Francisco.''
+{\tt getline} reads the entire line until the user hits
+Return or Enter.  This is useful for inputting strings that
+contain spaces.
 
-By searching for the quotation marks in a line of input, we
-can find the beginning and end of each city name.
-Searching for special characters like quotation marks can be a little
-awkward, though, because the quotation mark is a special character
-in C++, used to identify string values.
+In fact, {\tt getline} is generally useful for getting input
+of any kind.  For example, if you wanted the user to type an
+integer, you could input a string and then check to see if
+it is a valid integer.  If so, you can convert it to an integer
+value.  If not, you can print an error message and ask the user
+to try again.
 
-If we want to find the
-first appearance of a quotation mark, we have to write something
-like:
-
-\begin{lstlisting}
-  int index = line.find ('\"');
-\end{lstlisting}
-%
-The argument here looks like a mess, but it represents a single
-character, a double quotation mark.  The outermost single-quotes
-indicate that this is a character value, as usual.  The backslash
-(\verb+\+) indicates that we want to treat the next character
-literally.  The sequence \verb+\"+ represents a quotation mark; the
-sequence \verb+\'+ represents a single-quote.  Interestingly, the
-sequence \verb+\\+ represents a single backslash.  The first backslash
-indicates that we should take the second backslash seriously.
-
-\index{special character}
-\index{character!special sequence}
-\index{backslash}
-
-Parsing input lines consists of finding the beginning and
-end of each city name and using
-the {\tt substr} function to extract the cities and distance.
-{\tt substr} is a {\tt string} member function;
-it takes two arguments, the starting index of the substring
-and the length.
-
-\index{find}
-
-\begin{lstlisting}
-void processLine (string line, string& city1, string& city2, string& distString) {
-  // the character we are looking for is a quotation mark
-  char quote = '\"';
-
-  // store the indices of the quotation marks in an array
-  int quoteIndex[4];
-
-  // find the first quotation mark using the built-in find
-  quoteIndex[0] = line.find (quote);
-
-  // find the other quotation marks using the find from Chapter 7
-  for (int i=1; i<4; i++) {
-    quoteIndex[i] = find (line, quote, quoteIndex[i-1]+1);
-  }
-
-  // break the line up into substrings
-  int len1 = quoteIndex[1] - quoteIndex[0] - 1;
-  city1 = line.substr (quoteIndex[0]+1, len1);
-  int len2 = quoteIndex[3] - quoteIndex[2] - 1;
-  city2 = line.substr (quoteIndex[2]+1, len2);
-  int len3 = line.length() - quoteIndex[2] - 1;
-  distString = line.substr (quoteIndex[3]+1, len3);
-
-  // output the extracted information
-  cout << city1 << "\t" << city2 << "\t" << distString << endl;
-}
-\end{lstlisting}
-%
-Of course, just displaying the extracted information is not
-exactly what we want, but it is a good starting place.
-
-\section{Parsing numbers}
-\label{parsingnums}
-\index{parsing number}
-\index{atoi}
-\index{convert!to integer}
-
-The next task is to convert the numbers in the file from strings to
-integers.  When people write large numbers, they often use commas to
-group the digits, as in 1,750.  Most of the time when computers write
-large numbers, they don't include commas, and the built-in functions
-for reading numbers usually can't handle them.  That makes the
-conversion a little more difficult, but it also provides an
-opportunity to write a comma-stripping function, so that's ok.  Once
-we get rid of the commas, we can use the library function {\tt atoi}
-to convert to integer.  {\tt atoi} is defined in the header file {\tt
-cstdlib}.
-
-\index{character!classification}
-\index{isdigit}
-
-To get rid of the commas, one option is to traverse the string and
-check whether each character is a digit.  If so, we add it to the
-result string.  At the end of the loop, the result string contains all
-the digits from the original string, in order.
-
-\begin{lstlisting}
-int convertToInt (string s)
-{
-  string digitString = "";
-
-  for (int i=0; i<s.length(); i++) {
-    if (isdigit (s[i])) {
-      digitString += s[i];
-    }
-  }
-  return atoi (digitString.c_str());
-}
-\end{lstlisting}
-%
-The variable {\tt digitString} is an example of an {\bf accumulator}.  It is
-similar to the counter we saw in Section~\ref{loopcount},
-except that instead of getting incremented, it gets accumulates
-one new character at a time, using string concatentation.
-
-The expression
-
-\begin{lstlisting}
-      digitString += s[i];
-\end{lstlisting}
-%
-is equivalent to
-
-\begin{lstlisting}
-      digitString = digitString + s[i];
-\end{lstlisting}
-%
-Both statements add a single character onto the end of the existing
-string.
-
-\index{concatentation}
-\index{string!concatentation}
-\index{accumulator}
-\index{pattern!accumulator}
-
-Since {\tt atoi} takes a C string as a parameter, we have
-to convert {\tt digitString} to a C string before passing it
-as an argument.
-
-\index{c\_str}
-\index{C string}
-\index{string!native C}
-
-\section {{\tt matrix}}
-\index{matrix}
-\index{matrix}
-
-A {\tt matrix} is a two-dimensional array.  Instead of a length, it has two
-dimensions, rows and columns.
-
-Each element in the matrix is identified by two indices;
-one specifies the row number, the other the column number.
-
-\index{index}
-
-Create a matrix similarly to an array:
-
-\begin{lstlisting}
-  const int MAXROWS=50;
-  const int MAXCOLS=50;
-  int matrix[MAXROWS][MAXCOLS];
-\end{lstlisting}
-%
-This creates an array of integers with MAXROWS rows and MAXCOLS columns.  You can create an array of any of the datatypes we have learned about.  
-
-To access the elements of a matrix, we use the {\tt []} operator
-to specify the row and column:
-
-\begin{lstlisting}
-  matrix[0][0] = 1;
-  matrix[1][2] = 10.0 * m2[0][0];
-\end{lstlisting}
-%
-If we try to access an element that is out of range, the program
-prints an error message and quits.
-
-\index{run-time error}
-
-Remember that the row indices run from 0 to
-{\tt MAXROWS -1} and the column indices run from 0 to
-{\tt MAXCOLS -1}.
-
-\index{loop!nested}
-
-The usual way to traverse a matrix is with a nested loop.
-This loop sets each element of the matrix to the sum of its
-two indices:
-
-\begin{lstlisting}
-  for (int row=0; row < MAXROWS; row++) {
-    for (int col=0; col < MAXCOLS; col++) {
-      matrix[row][col] = row + col;
-    }
-  }
-\end{lstlisting}
-%
-This loop prints each row of the matrix with tabs between the
-elements and newlines between the rows:
-
-\begin{lstlisting}
-  for (int row=0; row < MAXROWS; row++) {
-    for (int col=0; col < MAXCOLS; col++) {
-      cout << matrix[row][col] << "\t";
-    }
-    cout << endl;
-  }
-\end{lstlisting}
-%
-
-\section{A distance matrix}
-
-Finally, we are ready to put the data from the file into
-a matrix.  Specifically, the matrix will have one row and
-one column for each city.
-
-We'll create the matrix in {\tt main}, with plenty of space
-to spare:
-
-\begin{lstlisting}
-  int distances [MAXROWS][MAXCOLS];
-\end{lstlisting}
-%
-
-Next we add new information to the
-matrix by using the indices of the two cities:
-
-\begin{lstlisting}
-void addDataToMatrix(string city1, string city2, string distString, string cityArr[],int &numCities, int distances[][MAXCOLS]){
-    //this find is adapted from the chapter 7 version
-    int index1 = find(cityArr,city1,numCities);
-    if (index1<0){ //city not found
-        index1=numCities;
-        cityArr[numCities++]=city1;
-    }
-    int index2=find(cityArr,city2,numCities);
-    if (index2<0){ //city not found
-        index2=numCities;
-        cityArr[numCities++]=city2;
-    }
-    int dist = convertToInt (distString);
-    distances[index1][index2] = dist;
-    distances[index2][index1] = dist;
-}
-\end{lstlisting}
-%
-Finally, in {\tt main} we can print the information in a
-human-readable form:
-
-\begin{lstlisting}
-for (int i=0; i<numCities; i++) {
-     for (int j=-1; j<=i; j++) {
-         if (j<0){
-             cout<<cityArr[i]<<"\t";
-         } else {
-             cout << distances[i][j] << "\t";
-         }
-    }
-    cout << endl;
-}
-cout<<"\t";
-for (int i=0; i<numCities; i++){
-    cout<<cityArr[i]<<"\t";
-}
-cout << endl;
-\end{lstlisting}
-%
-This code produces the output shown at the beginning of the
-chapter.  The original data is available from this book's github page.
-
-\section{A proper distance matrix}
-
-Although this code works, it is not as well organized as it
-could be, once we learn about vectors and objects, we might be able to improve upon this early prototype.  
-
-\section{Another type of Stream}
-\index{stringstream}
-\index{stringstream}
-
-A {\tt stringstream} is another way to move data in your program.  Like the other streams we have learned, it works with both the {\tt >>} operator
-and the {\tt getline} function.  You will often use this in conjunction with an {\tt ifstream} to help parse your data.  Let's say it looks like the following table where each line is a different person's data, but you don't know how much data is on each line. 
-\index{stringstream}
-
-\begin{verbatim}
-hgt:170 eye:blue age:23 
-hgt:165 age:45
-hgt:200 eye:amber age:31 wgt:200
-\end{verbatim}
-
-You could read and print the data for each person like so:
-\lstinputlisting{../code/cha9/cha9.cpp}
-
-As you can see, streams can be very useful. 
+To convert a string to an integer you can use the {\tt atoi}
+function defined in the header file {\tt cstdlib}.  We will
+get to that in Section~\ref{parsing}.
 
 \section{Glossary}
 
 \begin{description}
 
-\item[ordered set:]  A data structure in which every element appears
-only once and every element has an index that identifies it.
+\item[structure:]  A collection of data grouped together and
+treated as a single object.
 
-\item[stream:]  A data structure that represents a ``flow'' or
-sequence of data items from one place to another.  In C++ streams
-are used for input and output.
+\item[instance variable:]  One of the named pieces of data that make up
+a structure.
 
-\item[accumulator:]  A variable used inside a loop to accumulate
-a result, often by getting something added or concatenated during each
-iteration.
+\item[reference:]  A value that indicates or refers to a variable
+or structure.  In a state diagram, a reference appears as an arrow.
 
-\index{ordered set}
-\index{set!ordered}
-\index{stream}
-\index{accumulator}
-\index{pattern!accumulator}
+\item[pass by value:]  A method of parameter-passing in which the
+value provided as an argument is copied into the corresponding
+parameter, but the parameter and the argument occupy distinct
+locations.
+
+\item[pass by reference:]  A method of parameter-passing in which
+the parameter is a reference to the argument variable.  Changes
+to the parameter also affect the argument variable.
+
+\index{structure}
+\index{instance variable}
+\index{reference}
+\index{pass by value}
+\index{pass by reference}
 
 \end{description}
-
 

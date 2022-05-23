@@ -1,0 +1,31 @@
+Technique: compile with make, then use adobe's ps generator on the ps file, then to the accessibility stuff -> works with ffs?
+
+source code -> interpreter -> console
+
+source code -> compiler
+
+-> object code -> executor -> console
+
+firstLetter = 'a'
+hour=11
+minute=59
+
+argument='b' in main
+phil = 'b' in printTwice
+
+n=3 recurse=2 result=6
+n=2 recurse=1 result=2
+n=1 recurse=1 result=1
+n=0
+
+fred=5
+
+fred=7 (not 5 anymore)
+
+Suit and rank all equal 0
+
+Suit and rank all equal 0
+
+Caresian coordinates with imaginary and real axis
+
+Polar coordinates showing magnitude and angle

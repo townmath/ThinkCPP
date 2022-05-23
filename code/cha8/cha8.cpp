@@ -1,72 +1,37 @@
 #include <iostream>
-#include <cmath>
+#include <vector>
+#include <cstdlib>
+//using namespace std;
+using std::endl;
+using std::cout;
+using std::vector;
 
-using namespace std;
-
-struct Point {
-  double x, y;
-};
-
-struct Rectangle {
-  Point corner;
-  double width, height;
-};
-
-void printPoint (Point p)
-{
-  cout << "(" << p.x << ", " << p.y << ")" << endl;
-}
-
-void reflect (Point& p)
-{
-  double temp = p.x;
-  p.x = p.y;
-  p.y = temp;
-}
-
-double distance (Point p1, Point p2)
-{
-  double dx = p2.x - p1.x;
-  double dy = p2.y - p1.y;
-  return sqrt (dx*dx + dy*dy);
-}
-
-Point findCenter (Rectangle& box)
-{
-  double x = box.corner.x + box.width/2;
-  double y = box.corner.y + box.height/2;
-  Point result = {x, y};
-  return result;
-}
-
-void swap (int& x, int& y)
-{
-  int temp = x;
-  x = y;
-  y = temp;
-}
-
-int main ()
-{
-  Rectangle box = { {0.0, 0.0}, 100, 200 };
-
-  Point blank;
-  blank = (Point){ 3.0, 4.0 };
-
-  Point center = findCenter (box);
-  printPoint (center);
-
-  Point center2 = findCenter (box);
-  printPoint (center2);
-
-  reflect (center);
-  printPoint (center);
-  printPoint (center2);
-
-  int i = 7;
-  int j = 9;
-  swap (i, j);//+1);
-  cout << i << j << endl;
-
-  return 0;
+int main(){
+    vector<int> count (4, 0);
+    count[0] = 7;
+    count[1] = count[0] * 2;
+    count[2]++;
+    count[3] -= 60;
+    int i = 0;
+    while (i < 4) {
+        cout << count[i] << endl;
+        i++;
+    }
+    vector<int> copy1 (count);
+    //a for loop is sometimes called a fancy while loop
+    for (int i = 0; i < 4; i++) {
+        cout << copy1[i] << endl;
+    }
+    vector<int> copy2 = count;
+    for (i = 0; i < copy2.size(); i++) {
+        cout << copy2[i] << endl;
+    }
+    srand(time(NULL));
+    int upperBound=10;
+    int x = rand();
+    int y = x % upperBound;
+    cout<<x<<" "<<y<<endl;
+    int v = rand();
+    double w = double(v) / RAND_MAX;
+    cout<<v<<" "<<w<<endl;
 }

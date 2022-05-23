@@ -2,603 +2,685 @@
 % Copyright (C) 1999  Allen B. Downey
 
 
+\chapter{Vectors}
+\label{vectors}
+\index{vector}
+\index{type!vector}
 
-\chapter{Structures}
-\label{structs}
-\index{struct}
+A {\bf vector} is a set of values where each value is identified by a
+number (called an index).  An {\tt string} is similar to a vector,
+since it is made up of an indexed set of characters.  The nice thing
+about vectors is that they can be made up of any type of element,
+including basic types like {\tt int}s and {\tt double}s, 
+and user-defined types like {\tt Point} and {\tt Time} which we will 
+be introduced to later in the book.
 
-\section{Compound values}
+The {\tt vector} type is defined in the C++ Standard Template Library (STL).
+In order to use it, you have to include the header file {\tt
+vector}; again, the details of how to do that depend on your
+programming environment.
 
-Most of the data types we have been working with represent a single
-value---an integer, a floating-point number, a boolean value.  {\tt
-string}s are different in the sense that they are made up of smaller
-pieces, the characters.  Thus, {\tt string}s are an example of a
-{\bf compound} type.
-
-Depending on what we are doing, we may want to treat a compound type
-as a single thing (or object), or we may want to access its parts (or
-instance variables).  This ambiguity is useful.
-
-It is also useful to be able to create your own compound values.  C++
-provides two mechanisms for doing that: {\bf structures} and {\bf
-classes}.  We will start out with structures and get to classes in
-Chapter~\ref{class} (there is not much difference between them).
-
-\section{{\tt Point} objects}
-\index{Point}
-\index{struct!Point}
-
-As a simple example of a compound structure, consider the concept of a
-mathematical point.  At one level, a point is two numbers
-(coordinates) that we treat collectively as a single object.  In
-mathematical notation, points are often written in parentheses, with a
-comma separating the coordinates.  For example, $(0, 0)$ indicates the
-origin, and $(x, y)$ indicates the point $x$ units to the right and
-$y$ units up from the origin.
-
-A natural way to represent a point in C++ is with two {\tt double}s.
-The question, then, is how to group these two values into
-a compound object, or structure.  The answer is a {\tt struct}
-definition:
+You can create a vector the same way you create other variable types:
 
 \begin{lstlisting}
-struct Point {
-  double x, y;
-};  
+  vector<int> count;
+  vector<double> doubleVector;
 \end{lstlisting}
 %
-{\tt struct} definitions appear outside of any function definition,
-usually at the beginning of the program (after the {\tt include}
-statements).
-
-This definition indicates that there are two elements in this
-structure, named {\tt x} and {\tt y}.  These elements are called
-{\bf instance variables}, for reasons I will explain a little
-later.
-
-It is a common error to leave off the semi-colon at the end of a
-structure definition.  It might seem odd to put a semi-colon after a
-squiggly-brace, but you'll get used to it.
-
-Once you have defined the new structure, you can create variables
-with that type:
+The type that makes up the vector appears in angle brackets ({\tt <}
+and {\tt >}).  The first line creates a vector of integers named {\tt
+count}; the second creates a vector of {\tt double}s.  Although these
+statements are legal, they are not very useful because they create
+vectors that have no elements (their size is zero).  It is more
+common to specify the size of the vector in parentheses:
 
 \begin{lstlisting}
-  Point blank;
-  blank.x = 3.0;
-  blank.y = 4.0;   
+  vector<int> count (4);
 \end{lstlisting}
 %
-The first line is a conventional variable declaration: {\tt blank} has
-type {\tt Point}.  The next two lines initialize the instance variables of the
-structure.  The ``dot notation'' used here is similar to the syntax
-for invoking a function on an object, as in {\tt fruit.length()}.
-Of course, one difference is that function names are always followed
-by an argument list, even if it is empty.
+The syntax here is a little odd; it looks like a combination of a
+variable declarations and a function call.  In fact, that's exactly
+what it is.  The function we are invoking is an {\tt vector}
+constructor.  A {\bf constructor} is a special function that creates
+new objects and initializes their instance variables.  In this case,
+the constructor takes a single argument, which is the size of the new
+vector.
 
-\index{declaration}
-\index{statement!declaration}
-\index{reference}
-\index{state diagram}
-\index{state}
+\index{constructor}
 
-The result of these assignments is shown in the following
-state diagram:
+The following figure shows how vectors are represented in state
+diagrams:
 
 \vspace{0.1in}
-\centerline{\epsfig{figure=point.eps}}
+\centerline{\epsfig{figure=vector.eps}}
 \vspace{0.1in}
 
-As usual, the name of the variable {\tt blank} appears outside the box
-and its value appears inside the box.  In this case, that value is
-a compound object with two named instance variables.
+The large numbers inside the boxes are the {\bf elements} of
+the vector.  The small numbers outside the boxes are the
+indices used to identify each box.  When you allocate a new
+vector, the elements are not initialized.  They could contain
+any values.
 
-\section{Accessing instance variables}
-\index{struct!instance variable}
-
-You can read the values of an instance variable using the same syntax we
-used to write them:
+There is another constructor for {\tt vector}s that takes
+two parameters; the second is a ``fill value,'' the
+value that will be assigned to each of the elements.
 
 \begin{lstlisting}
-    int x = blank.x;
+  vector<int> count (4, 0);
 \end{lstlisting}
 %
-The expression {\tt blank.x} means ``go to the object named {\tt
-blank} and get the value of {\tt x}.''  In this case we assign that
-value to a local variable named {\tt x}.  Notice that there is no
-conflict between the local variable named {\tt x} and the instance
-variable named {\tt x}.  The purpose of dot notation is to identify
-{\em which} variable you are referring to unambiguously.
+This statement creates a vector of four elements and initializes
+all of them to zero.
 
-You can use dot notation as part of any C++ expression, so the
-following are legal.
+\section{Accessing elements}
+\index{element}
+\index{vector!element}
+
+The {\tt []} operator reads and writes the elements of a vector in
+much the same way it accesses the characters in an {\tt string}.  As
+with {\tt string}s, the indices start at zero, so {\tt count[0]}
+refers to the ``zeroeth'' element of the vector, and {\tt count[1]}
+refers to the ``oneth'' element.  You can use the {\tt []} operator
+anywhere in an expression:
 
 \begin{lstlisting}
-  cout << blank.x << ", " << blank.y << endl;
-  double distance = blank.x * blank.x + blank.y * blank.y;
+  count[0] = 7;
+  count[1] = count[0] * 2;
+  count[2]++;
+  count[3] -= 60;
 \end{lstlisting}
 %
-The first line outputs {\tt 3, 4}; the second line calculates
-the value 25.
+All of these are legal assignment statements.  Here is the
+effect of this code fragment:
 
-\section{Operations on structures}
-\index{struct!operations}
+\vspace{0.1in}
+\centerline{\epsfig{figure=vector2.eps}}
+\vspace{0.1in}
 
-Most of the operators we have been using on other types, like
-mathematical operators ( {\tt +}, {\tt \%}, etc.) and comparison
-operators ({\tt ==}, {\tt >}, etc.), do not work on structures.
-Actually, it is possible to define the meaning of these operators
-for the new type, but we won't do that in this book.
+Since elements of this vector are numbered from 0 to 3, there is no
+element with the index 4.  It is a common error to go beyond the
+bounds of a vector, which causes a run-time error.  The program outputs
+an error message like ``Illegal vector index'', and then quits.
 
-On the other hand, the assignment operator {\em does} work for
-structures.  It can be used in two ways: to initialize the instance
-variables of a structure or to copy the instance variables from one
-structure to another.  An initialization looks like this:
+\index{run-time error}
+\index{index}
+\index{expression}
+
+You can use any expression as an index, as long as it has type {\tt
+int}.  One of the most common ways to index a vector is with a loop
+variable.  For example:
 
 \begin{lstlisting}
-  Point blank = { 3.0, 4.0 };
+  int i = 0;
+  while (i < 4) {
+    cout << count[i] << endl;
+    i++;
+  }
 \end{lstlisting}
 %
-The values in squiggly braces get assigned to the instance variables of
-the structure one by one, in order.  So in this case, {\tt x}
-gets the first value and {\tt y} gets the second.
+This {\tt while} loop counts from 0
+to 4; when the loop variable {\tt i} is 4, the
+condition fails and the loop terminates.  Thus, the body
+of the loop is only executed when {\tt i} is 0, 1, 2 and 3.
 
-Unfortunately, this syntax can be used only in an initialization,
-not in an assignment statement.  So the following is illegal.
+\index{loop}
+\index{loop variable}
+\index{variable!loop}
+
+Each time through the loop we use {\tt i} as an index into
+the vector, outputting the {\tt i}th element.  This type of
+vector traversal is very common.  Vectors and loops go together
+like fava beans and a nice Chianti.
+
+\section{Copying vectors}
+\index{vector!copying}
+
+There is one more constructor for {\tt vector}s, which is
+called a copy constructor because it takes one {\tt vector}
+as an argument and creates a new vector that is the same size,
+with the same elements.
 
 \begin{lstlisting}
-  Point blank;
-  blank = { 3.0, 4.0 };       // WRONG !!
+  vector<int> copy (count);
 \end{lstlisting}
 %
-You might wonder why this perfectly reasonable statement should
-be illegal; I'm not sure, but I think the problem is that the compiler
-doesn't know what type the right hand side should be.  If you
-add a typecast:
+Although this syntax is legal, it is almost never used for
+{\tt vector}s because there is a better alternative:
 
 \begin{lstlisting}
-  Point blank;
-  blank = (Point){ 3.0, 4.0 };
+  vector<int> copy = count;
 \end{lstlisting}
 %
-That works.
+The {\tt =} operator works on {\tt vector}s in pretty much
+the way you would expect.
 
-It is legal to assign one structure to
-another.  For example:
+\section{{\tt for} loops}
+
+The loops we have written so far have a number of elements
+in common.  All of them start by initializing a variable;
+they have a test, or condition, that depends on that variable;
+and inside the loop they do something to that variable,
+like increment it.
+
+\index{loop!for}
+\index{for}
+\index{statement!for}
+
+This type of loop is so common that there is an alternate
+loop statement, called {\tt for}, that expresses it more
+concisely.  The general syntax looks like this:
 
 \begin{lstlisting}
-  Point p1 = { 3.0, 4.0 };
-  Point p2 = p1;
-  cout << p2.x << ", " <<  p2.y << endl;
+  for (INITIALIZER; CONDITION; INCREMENTOR) {
+    BODY
+  }
 \end{lstlisting}
 %
-The output of this program is {\tt 3, 4}.
-
-\section{Structures as parameters}
-\index{parameter}
-\index{struct!as parameter}
-
-You can pass structures as parameters in the usual way.  For
-example,
+This statement is exactly equivalent to
 
 \begin{lstlisting}
-void printPoint (Point p) {
-  cout << "(" << p.x << ", " << p.y << ")" << endl;
+  INITIALIZER;
+  while (CONDITION) {
+    BODY
+    INCREMENTOR
+  }
+\end{lstlisting}
+%
+except that it is more concise and, since it puts all the
+loop-related statements in one place, it is easier to read.
+For example:
+
+\begin{lstlisting}
+  int i;
+  for (i = 0; i < 4; i++) {
+    cout << count[i] << endl;
+  }
+\end{lstlisting}
+%
+is equivalent to 
+
+\begin{lstlisting}
+  int i = 0;
+  while (i < 4) {
+    cout << count[i] << endl;
+    i++;
+  }
+\end{lstlisting}
+
+\section{Vector size}
+\index{size!vector}
+\index{vector!size}
+
+There are a few functions you can invoke on an
+{\tt vector}.  One of them is very useful, though: {\tt size()}.
+Not surprisingly, it returns the size of the vector (the number
+of elements).
+
+It is a good idea to use this value as the upper bound of a loop,
+rather than a constant.  That way, if the size of the vector
+changes, you won't have to go through the program changing all the
+loops; they will work correctly for any size vector.
+
+\begin{lstlisting}
+  int i;
+  for (i = 0; i < count.size(); i++) {
+    cout << count[i] << endl;
+  }
+\end{lstlisting}
+%
+The last time the body of the loop gets executed, the value of {\tt i}
+is {\tt count.size() - 1}, which is the index of the last element.  When
+{\tt i} is equal to {\tt count.size()}, the condition fails and the body
+is not executed, which is a good thing, since it would cause a
+run-time error. One thing that we should notice here is that the
+size() function is called every time the loop is executed. Calling
+a function again and again reduces execution speed, so it would be better
+to store the size in some variable by calling the {\tt size()} function
+before the loop begins, and use this variable to check for the last element.
+You can try this program as an excercise.
+
+\section{Vector functions}
+\index{functions!vector}
+\index{vector!functions}
+
+The best feature of a vector is its resizeability A vector, once declared,
+can be resized from anywhere within the program. Suppose we have a situation
+where we input numbers from the user and store them in a vector till he
+inputs {\tt -1}, and then display them. In such a case, we do not know the size of the
+vector beforehand. So we need wish add new values to the end of
+a vector as the user inputs them. We can use then vector
+function {\tt push\_back()} for that purpose.
+
+\lstinputlisting{../code/cha11/push_back.cpp}
+
+\section{Random numbers}
+\label{random}
+\label{pseudorandom}
+\index{random number}
+\index{deterministic}
+\index{nondeterministic}
+
+Most computer programs do the same thing every time they are executed,
+so they are said to be {\bf deterministic}.  Usually, determinism is a
+good thing, since we expect the same calculation to yield the same
+result.  For some applications, though, we would like the
+computer to be unpredictable.  Games are an obvious example.
+
+Making a program truly {\bf nondeterministic} turns out to be not
+so easy, but there are ways to make it at least seem
+nondeterministic.  One of them is to generate {pseudorandom} numbers and
+use them to determine the outcome of the program.
+Pseudorandom numbers
+are not truly random in the mathematical sense, but 
+for our purposes, they will do.
+
+C++ provides a function called {\tt rand} that generates
+pseudorandom numbers.  It is declared in the
+header file {\tt cstdlib}, which contains a variety of ``standard
+library'' functions, hence the name.
+
+The return value from {\tt rand} is an integer between 0 and {\tt
+RAND\_MAX}, where {\tt RAND\_MAX} is a large number (about 2 billion
+on my computer) also defined in the header file.  Each time you call
+{\tt rand} you get a different randomly-generated number.  To see a
+sample, run this loop:
+
+\lstinputlisting{../code/cha11/randos.cpp}
+%
+On my machine I got the following output:
+
+\begin{verbatim}
+1804289383
+846930886
+1681692777
+1714636915
+\end{verbatim}
+%
+You will probably get something similar, but different, on yours.
+
+Of course, we don't always want to work with gigantic integers.
+More often we want to generate integers between 0 and some
+upper bound.  A simple way to do that is with the modulus
+operator.  For example:
+
+\begin{lstlisting}
+  int x = rand();
+  int y = x % upperBound;
+\end{lstlisting}
+%
+Since {\tt y} is the remainder when {\tt x} is divided by
+{\tt upperBound}, the only possible values for {\tt y}
+are between 0 and {\tt upperBound - 1}, including both
+end points.  Keep in mind, though, that {\tt y} will never
+be equal to {\tt upperBound}.
+
+It is also frequently useful to generate random floating-point values.
+A common way to do that is by dividing by {\tt RAND\_MAX}.  For
+example:
+
+\begin{lstlisting}
+  int v = rand();
+  double w = double(w) / RAND_MAX;
+\end{lstlisting}
+%
+This code sets {\tt y} to a random value between 0.0 and 1.0,
+including both end points.  As an exercise, you might want to
+think about how to generate a random floating-point value in
+a given range; for example, between 100.0 and 200.0.
+
+\section{Statistics}
+\index{statistics}
+\index{distribution}
+\index{mean}
+
+The numbers generated by {\tt rand} are supposed to be distributed
+uniformly.  That means that each value in the range should be
+equally likely.  If we count the number of times each value appears,
+it should be roughly the same for all values, provided that we
+generate a large number of values.
+
+In the next few sections, we will write programs that generate
+a sequence of random numbers and check whether this property
+holds true.
+
+\section{Vector of random numbers}
+
+The first step is to generate a large number of random values
+and store them in a vector.  By ``large number,'' of course,
+I mean 20.  It's always a good idea to start with a manageable
+number, to help with debugging, and then increase it later.
+
+The following function takes a single argument, the size of
+the vector.  It allocates a new vector of {\tt int}s, 
+and fills it with random values between 0 and {\tt upperBound-1}.
+
+\begin{lstlisting}
+vector<int> randomVector (int n, int upperBound) {
+  vector<int> vec (n);
+  for (int i = 0; i<vec.size(); i++) {
+    vec[i] = rand() % upperBound;
+  }
+  return vec;
 }
 \end{lstlisting}
 %
-{\tt printPoint} takes a point as an argument and outputs it in
-the standard format.  If you call {\tt printPoint (blank)},
-it will output {\tt (3, 4)}.
-
-As a second example, we can rewrite the {\tt distance} function from
-Section~\ref{distance} so that it takes two {\tt Point}s as parameters
-instead of four {\tt double}s.
+The return type is {\tt vector<int>}, which means that
+this function returns a vector of integers.
+To test this function, it is convenient to have a function that
+outputs the contents of a vector.
 
 \begin{lstlisting}
-double distance (Point p1, Point p2) {
-  double dx = p2.x - p1.x;
-  double dy = p2.y - p1.y;
-  return sqrt (dx*dx + dy*dy);
-}
-\end{lstlisting}
-
-\section{Call by value}
-\index{parameter passing}
-\index{call by value}
-
-When you pass a structure as an argument, remember that the
-argument and the parameter are not the same variable.  Instead,
-there are two variables (one in the caller and one in the
-callee) that have the same value, at least initially.  For
-example, when we call {\tt printPoint}, the stack diagram
-looks like this:
-
-\vspace{0.1in}
-\centerline{\epsfig{figure=point2.eps}}
-\vspace{0.1in}
-%
-If {\tt printPoint} happened to change one of the instance variables
-of {\tt p}, it would have no effect on {\tt blank}.  Of course, there
-is no reason for {\tt printPoint} to modify its parameter, so this
-isolation between the two functions is appropriate.
-
-This kind of parameter-passing is called ``pass by value''
-because it is the value of the structure (or other type) that
-gets passed to the function.
-
-\section{Call by reference}
-\index{parameter passing}
-\index{call by reference}
-\index{reference}
-
-An alternative parameter-passing mechanism that is available
-in C++ is called ``pass by reference.''  This mechanism makes
-it possible to pass a structure to a procedure and modify it.
-
-For example, you can reflect a point around the 45-degree line by
-swapping the two coordinates.  The most obvious (but incorrect) way to
-write a {\tt reflect} function is something like this:
-
-\begin{lstlisting}
-void reflect (Point p)      // WRONG !!
-{
-  double temp = p.x;
-  p.x = p.y;
-  p.y = temp;
+void printVector (const vector<int>& vec) {
+  for (int i = 0; i<vec.size(); i++) {
+    cout << vec[i] << " ";
+  }
 }
 \end{lstlisting}
 %
-But this won't work, because the changes we make in {\tt reflect}
-will have no effect on the caller.
+Notice that it is legal to pass {\tt vector}s by reference.
+In fact it is quite common, since it makes it unnecessary to
+copy the vector.  Since {\tt printVector} does not modify the
+vector, we declare the parameter {\tt const}.
 
-Instead, we have to specify that we want to pass the parameter by
-reference.  We do that by adding an ampersand ({\tt \&}) to the
-parameter declaration:
+The following code generates a vector and outputs it:
 
 \begin{lstlisting}
-void reflect (Point& p)
-{
-  double temp = p.x;
-  p.x = p.y;
-  p.y = temp;
+  int numValues = 20;
+  int upperBound = 10;
+  vector<int> vector = randomVector (numValues, upperBound);
+  printVector (vector);
+\end{lstlisting}
+%
+On my machine the output is
+
+\begin{verbatim}
+3 6 7 5 3 5 6 2 9 1 2 7 0 9 3 6 0 6 2 6 
+\end{verbatim}
+%
+which is pretty random-looking.  Your results may differ.
+
+If these numbers are really random,
+we expect each digit to appear the same number of times---twice
+each.  In fact, the number 6 appears five times, and the numbers 4
+and 8 never appear at all.
+
+Do these results mean the values are not really uniform?  It's
+hard to tell.  With so few values, the chances are slim
+that we would get exactly what we expect.  But as the number
+of values increases, the outcome should be more predictable.
+
+To test this theory, we'll write some programs that count the
+number of times each value appears, and then see what happens
+when we increase {\tt numValues}.
+
+\section{Counting}
+\label{counting}
+\index{traverse!counting}
+\index{loop!counting}
+\index{counter}
+
+A good approach to problems like this is to think of simple functions
+that are easy to write, and that might turn out to be useful.  Then
+you can combine them into a solution.  This approach is sometimes
+called {\bf bottom-up design}.  Of course, it is not easy to
+know ahead of time which functions are likely to be useful, but as you
+gain experience you will have a better idea.
+
+\index{bottom-up design}
+\index{program development!bottom-up}
+
+Also, it is not always obvious what sort of things are easy to write,
+but a good approach is to look for subproblems that fit a pattern you
+have seen before.
+
+\index{pattern!counter}
+
+Back in Section~\ref{loopcount} we looked at a loop that traversed a
+string and counted the number of times a given letter appeared.  You
+can think of this program as an example of a pattern called ``traverse
+and count.''  The elements of this pattern are:
+
+\begin{itemize}
+
+\item A set or container that can be traversed, like a string
+or a vector.
+
+\item A test that you can apply to each element in the container.
+
+\item A counter that keeps track of how many elements pass
+the test.
+
+\end{itemize}
+
+In this case, I have a function in mind called {\tt howMany} that
+counts the number of elements in a vector that equal a given value.
+The parameters are the vector and the integer value we are looking
+for.  The return value is the number of times the value appears.
+
+\begin{lstlisting}
+int howMany (const vector<int>& vec, int value) {
+  int count = 0;
+  for (int i=0; i< vec.size(); i++) {
+    if (vec[i] == value) count++;
+  }
+  return count;
 }
 \end{lstlisting}
-%
-Now we can call the function in the usual way:
+
+
+\section{Checking the other values}
+
+{\tt howMany} only counts the occurrences of a particular value, and
+we are interested in seeing how many times each value appears.
+We can solve that problem with a loop:
 
 \begin{lstlisting}
-  printPoint (blank);
-  reflect (blank);
-  printPoint (blank);
+  int numValues = 20;
+  int upperBound = 10;
+  vector<int> vector = randomVector (numValues, upperBound);
+
+  cout << "value\thowMany";
+
+  for (int i = 0; i<upperBound; i++) {
+    cout << i << '\t' << howMany (vector, i) << endl;
+  }
 \end{lstlisting}
 %
-The output of this program is as expected:
+Notice that it is legal to declare a variable inside a {\tt for}
+statement.  This syntax is sometimes convenient, but you should
+be aware that a variable declared inside a loop only exists
+inside the loop.  If you try to refer to {\tt i} later, you
+will get a compiler error.
+
+This code uses the loop variable as an argument to
+{\tt howMany}, in order to check each value between 0 and 9,
+in order.  The result is:
+
+\begin{verbatim}
+value   howMany
+0       2
+1       1
+2       3
+3       3
+4       0
+5       2
+6       5
+7       2
+8       0
+9       2
+\end{verbatim}
+%
+Again, it is hard to tell if the digits are really appearing
+equally often.  If we increase {\tt numValues} to 100,000 we
+get the following:
+
+\begin{verbatim}
+value   howMany
+0       10130
+1       10072
+2       9990
+3       9842
+4       10174
+5       9930
+6       10059
+7       9954
+8       9891
+9       9958
+\end{verbatim}
+%
+In each case, the number of appearances is within about 1\% of
+the expected value (10,000), so we conclude that the random
+numbers are probably uniform.
+
+\section {A histogram}
+\index{histogram}
+
+It is often useful to take the data from the previous tables
+and store them for later access, rather than just print them.
+What we need is a way to store 10 integers.  We could create
+10 integer variables with names like {\tt howManyOnes},
+{\tt howManyTwos}, etc.  But that would require a lot of
+typing, and it would be a real pain later if we decided to
+change the range of values.
+
+A better solution is to use a vector with size 10.  That
+way we can create all ten storage locations at once and we
+can access them using indices, rather than ten different names.
+Here's how:
 
 \begin{lstlisting}
-(3, 4)
-(4, 3)
+  int numValues = 100000;
+  int upperBound = 10;
+  vector<int> vector = randomVector (numValues, upperBound);
+  vector<int> histogram (upperBound);
+
+  for (int i = 0; i<upperBound; i++) {
+    int count = howMany (vector, i);
+    histogram[i] = count;
+  }
 \end{lstlisting}
 %
-Here's how we would draw a stack diagram for this program:
+I called the vector {\bf histogram} because that's
+a statistical term for a vector of numbers that counts the
+number of appearances of a range of values.
 
-\vspace{0.1in}
-\centerline{\epsfig{figure=point3.eps}}
-\vspace{0.1in}
-%
-The parameter {\tt p} is a reference to the structure named {\tt
-blank}.  The usual representation for a reference is a dot with an
-arrow that points to whatever the reference refers to.
+\index{histogram}
 
-The important thing to see in this diagram is that any changes that
-{\tt reflect} makes in {\tt p} will also affect {\tt blank}.
+The tricky thing here is that I am using the loop variable
+in two different ways.  First, it is an argument to {\tt howMany},
+specifying which value I am interested in.  Second, it is
+an index into the histogram, specifying which location I should
+store the result in.
 
-Passing structures by reference is more versatile than passing by
-value, because the callee can modify the structure.  It is also
-faster, because the system does not have to copy the whole
-structure.  On the other hand, it is less safe, since it is harder to
-keep track of what gets modified where.  Nevertheless, in C++
-programs, almost all structures are passed by reference almost all the
-time.  In this book I will follow that convention.
+\section{A single-pass solution}
 
+Although this code works, it is not as efficient as it could
+be.  Every time it calls {\tt howMany}, it traverses the
+entire vector.  In this example we have to traverse the
+vector ten times!
 
-\section{Rectangles}
-\index{Rectangle}
-\index{struct!Rectangle}
-
-Now let's say that we want to create a structure to represent
-a rectangle.  The question is, what information do I have to
-provide in order to specify a rectangle?  To keep things simple
-let's assume that the rectangle will be oriented vertically or
-horizontally, never at an angle.
-
-There are a few possibilities: I could specify the center of
-the rectangle (two coordinates) and its size (width and height),
-or I could specify one of the corners and the size, or I
-could specify two opposing corners.
-
-The most common choice in existing programs is to specify the
-upper left corner of the rectangle and the size.  To do that
-in C++, we will define a structure that contains a {\tt Point}
-and two doubles.
+It would be better to make a single pass through the vector.
+For each value in the vector we could find the corresponding
+counter and increment it.  In other words, we can use the
+value from the vector as an index into the histogram.  Here's
+what that looks like:
 
 \begin{lstlisting}
-struct Rectangle {
-  Point corner;
-  double width, height;
-};  
+  vector<int> histogram (upperBound, 0);
+
+  for (int i = 0; i<numValues; i++) {
+    int index = vector[i];
+    histogram[index]++;
+  }
 \end{lstlisting}
 %
-Notice that one structure can contain another.  In fact, this
-sort of thing is quite common.  Of course, this means that in
-order to create a {\tt Rectangle}, we have to create a {\tt Point}
-first:
+The first line initializes the elements of the histogram to
+zeroes.  That way, when we use the increment
+operator ({\tt ++}) inside the loop, we know we are starting from zero.
+Forgetting to initialize counters is a common error.
 
+As an exercise, encapsulate this code in a function called {\tt
+histogram} that takes a vector and the range of values in the vector
+(in this case 0 through 10), and that returns a histogram of the
+values in the vector.
+
+\section{Random seeds}
+\index{seed}
+\index{random}
+
+If you have run the code in this chapter a few times, you might
+have noticed that you are getting the same ``random'' values
+every time.  That's not very random!
+
+One of the properties of pseudorandom number generators is that
+if they start from the same place they will generate
+the same sequence of values.  The starting place is called
+a {\bf seed}; by default, C++ uses
+the same seed every time you run the program.
+
+While you are debugging, it is often helpful to
+see the same sequence over and over.  That way, when you make
+a change to the program you can compare the output before and
+after the change.
+
+If you want to choose a different seed for the random number
+generator, you can use the {\tt srand} function.  It takes
+a single argument, which is an integer between 0 and {\tt RAND\_MAX}.
+
+For many applications, like games, you want to see a different
+random sequence every time the program runs.  A common way to
+do that is to use a library function like {\tt gettimeofday}
+to generate something reasonably unpredictable
+and unrepeatable, like the number of milliseconds since the
+last second tick, and use that number as a seed.  Here is a typical 
+implementation:
 \begin{lstlisting}
-  Point corner = { 0.0, 0.0 };
-  Rectangle box = { corner, 100.0, 200.0 };
+srand(time(NULL));
 \end{lstlisting}
-%
-This code creates a new {\tt Rectangle} structure and initializes the
-instance variables.  The figure shows the effect of this assignment.
-
-\vspace{0.1in}
-\centerline{\epsfig{figure=rectangle.eps}}
-\vspace{0.1in}
-%
-We can access the {\tt width} and {\tt height} in the usual way:
-
-\begin{lstlisting}
-  box.width += 50.0;
-  cout << box.height << endl;
-\end{lstlisting}
-%
-In order to access the instance variables of {\tt corner}, we can use a
-temporary variable:
-
-\begin{lstlisting}
-  Point temp = box.corner;
-  double x = temp.x;
-\end{lstlisting}
-%
-Alternatively, we can compose the two statements:
-
-\index{composition}
-
-\begin{lstlisting}
-  double x = box.corner.x;
-\end{lstlisting}
-%
-It makes the most sense to read this statement from right to
-left: ``Extract {\tt x} from the {\tt corner} of the {\tt box},
-and assign it to the local variable {\tt x}.''
-
-While we are on the subject of composition, I should point
-out that you can, in fact, create the {\tt Point} and the
-{\tt Rectangle} at the same time:
-
-\begin{lstlisting}
-  Rectangle box = { { 0.0, 0.0 }, 100.0, 200.0 };
-\end{lstlisting}
-%
-The innermost squiggly braces are the coordinates of the
-corner point; together they make up the first of the three
-values that go into the new {\tt Rectangle}.  This statement
-is an example of {\bf nested structure}.
-
-\index{nested structure}
 
 
-\section{Structures as return types}
-\index{struct!as return type}
-\index{return}
-\index{statement!return}
-
-You can write functions that return structures.  For example,
-{\tt findCenter} takes a {\tt Rectangle} as an argument and
-returns a {\tt Point} that contains the coordinates of the
-center of the {\tt Rectangle}:
-
-\begin{lstlisting}
-Point findCenter (Rectangle& box)
-{
-  double x = box.corner.x + box.width/2;
-  double y = box.corner.y + box.height/2;
-  Point result = {x, y};
-  return result;
-}
-\end{lstlisting}
-%
-To call this function, we have to pass a box as an argument
-(notice that it is being passed by reference), and assign the
-return value to a {\tt Point} variable:
-
-\begin{lstlisting}
-  Rectangle box = { {0.0, 0.0}, 100, 200 };
-  Point center = findCenter (box);
-  printPoint (center);
-\end{lstlisting}
-%
-The output of this program is {\tt (50, 100)}.
-
-\section {Passing other types by reference}
-\index{parameter passing}
-\index{call by reference}
-\index{reference}
-
-It's not just structures that can be passed by reference.
-All the other types we've seen can, too.  For example, to swap
-two integers, we could write something like:
-
-\begin{lstlisting}
-void swap (int& x, int& y)
-{
-  int temp = x;
-  x = y;
-  y = temp;
-}
-\end{lstlisting}
-%
-We would call this function in the usual way:
-
-\begin{lstlisting}
-  int i = 7;
-  int j = 9;
-  swap (i, j);
-  cout << i << j << endl;
-\end{lstlisting}
-%
-The output of this program is {\tt 97}.  Draw a stack
-diagram for this program to convince yourself this is true.
-If the parameters {\tt x} and {\tt y} were declared as
-regular parameters (without the {\tt \&}s), {\tt swap} would
-not work.  It would modify {\tt x} and {\tt y} and have no
-effect on {\tt i} and {\tt j}.
-
-When people start passing things like integers by reference,
-they often try to use an expression
-as a reference argument.  For example:
-
-\begin{lstlisting}
-  int i = 7;
-  int j = 9;
-  swap (i, j+1);         // WRONG!!
-\end{lstlisting}
-%
-This is not legal because the expression {\tt j+1} is not
-a variable---it does not occupy a location that the reference
-can refer to.  It is a little tricky to figure out exactly
-what kinds of expressions can be passed by reference.  For now
-a good rule of thumb is that reference arguments have to be
-variables.
-
-\section{Getting user input}
-\label{input}
-\index{input!keyboard}
-
-The programs we have written so far are pretty predictable;
-they do the same thing every time they run.  Most of the time,
-though, we want programs that take input from the user and
-respond accordingly.
-
-There are many ways to get input, including keyboard
-input, mouse movements and button clicks, as well as more exotic
-mechanisms like voice control and retinal scanning.  In this
-text we will consider only keyboard input.
-
-\index{stream}
-\index{cin}
-\index{cout}
-
-In the header file {\tt iostream},
-C++ defines an object named {\tt cin} that handles input in
-much the same way that {\tt cout} handles output.  To get an
-integer value from the user:
-
-\begin{lstlisting}
-  int x;
-  cin >> x;
-\end{lstlisting}
-%
-The {\tt >>} operator causes the program to stop executing and
-wait for the user to type something.  If the user types a valid
-integer, the program converts it into an integer value and
-stores it in {\tt x}.
-
-\index{operator!{\tt >>}}
-
-If the user types something other than an integer,
-C++ doesn't report an error, or anything sensible like that.
-Instead, it puts some meaningless value in {\tt x} and continues.
-
-Fortunately, there is a way to check and see if an input
-statement succeeds.  We can invoke the {\tt good} function on
-{\tt cin} to check what is called the {\bf stream state}.
-{\tt good} returns a {\tt bool}: if true, then the last input
-statement succeeded.  If not, we know that some previous operation
-failed, and also that the next operation will fail.
-
-Thus, getting input from the user might look like this:
-
-\lstinputlisting{../code/cha8/enter_int.cpp}
-%
-{\tt cin} can also be used to input a {\tt string}:
-
-\begin{lstlisting}
-  string name;
-
-  cout << "What is your name? ";
-  cin >> name;
-  cout << name << endl;
-\end{lstlisting}
-%
-Unfortunately, this statement only takes the first word of
-input, and leaves the rest for the next input statement.
-So, if you run this program and type your full name, it
-will only output your first name.
-
-Because of these problems (inability to handle errors and
-funny behavior), I avoid using the {\tt >>} operator altogether,
-unless I am reading data from a source that is known to be
-error-free.
-
-Instead, I use a function in the header {\tt string} called {\tt getline}.
-
-\begin{lstlisting}
-  string name;
-
-  cout << "What is your name? ";
-  getline (cin, name);
-  cout << name << endl;
-\end{lstlisting}
-%
-The first argument to {\tt getline} is {\tt cin}, which is
-where the input is coming from.  The second argument is the
-name of the {\tt string} where you want the result to be
-stored.
-
-{\tt getline} reads the entire line until the user hits
-Return or Enter.  This is useful for inputting strings that
-contain spaces.
-
-In fact, {\tt getline} is generally useful for getting input
-of any kind.  For example, if you wanted the user to type an
-integer, you could input a string and then check to see if
-it is a valid integer.  If so, you can convert it to an integer
-value.  If not, you can print an error message and ask the user
-to try again.
-
-To convert a string to an integer you can use the {\tt atoi}
-function defined in the header file {\tt cstdlib}.  We will
-get to that in Section~\ref{parsing}.
 
 \section{Glossary}
 
 \begin{description}
 
-\item[structure:]  A collection of data grouped together and
-treated as a single object.
+\item[vector:]  A named collection of values, where all the
+values have the same type, and each value is identified by
+an index.
 
-\item[instance variable:]  One of the named pieces of data that make up
-a structure.
+\item[element:]  One of the values in a vector.  The {\tt []}
+operator selects elements of a vector.
 
-\item[reference:]  A value that indicates or refers to a variable
-or structure.  In a state diagram, a reference appears as an arrow.
+\item[index:]  An integer variable or value used to indicate
+an element of a vector.
 
-\item[pass by value:]  A method of parameter-passing in which the
-value provided as an argument is copied into the corresponding
-parameter, but the parameter and the argument occupy distinct
-locations.
+\item[constructor:]  A special function that creates a new
+object and initializes its instance variables.
 
-\item[pass by reference:]  A method of parameter-passing in which
-the parameter is a reference to the argument variable.  Changes
-to the parameter also affect the argument variable.
+\item[deterministic:]  A program that does the same thing every
+time it is run.
 
-\index{structure}
-\index{instance variable}
-\index{reference}
-\index{pass by value}
-\index{pass by reference}
+\item[pseudorandom:]  A sequence of numbers that appear to be
+random, but which are actually the product of a deterministic
+computation.
+
+\item[seed:]  A value used to initialize a random number sequence.
+Using the same seed should yield the same sequence of values.
+
+\item[bottom-up design:]  A method of program development that
+starts by writing small, useful functions and then assembling
+them into larger solutions.
+
+\item[histogram:]  A vector of integers where each integer
+counts the number of values that fall into a certain range.
+
+\index{vector}
+\index{element}
+\index{index}
+\index{constructor}
+\index{deterministic}
+\index{pseudorandom}
+\index{seed}
+\index{histogram}
 
 \end{description}
-

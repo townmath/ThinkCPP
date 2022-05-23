@@ -67,7 +67,14 @@ program and does what it says.  In effect, it translates the program
 line-by-line, alternately reading lines and carrying out commands.
 
 \vspace{0.1in}
-\centerline{\epsfig{figure=interpret.eps}}
+\centerline{
+%\begin{figure}
+%	\centering
+	\epsfig{figure=interpret.eps}
+%	\caption{test}
+%	\Description[source code->interpreter->console]{The interpreter reads the source code and the result appears on the screen.}
+%\end{figure}
+}%centerline
 \vspace{0.1in}
 
 A compiler is a program that reads a high-level program and
@@ -196,7 +203,6 @@ without spewing error messages.\
   Another comes
                 also picking flowers
 \end{verbatim}
-
 \index{cummings, e e}
 
 Compilers are not so forgiving.  If there is a single syntax
@@ -487,7 +493,7 @@ the following:
 \begin{verbatim}
 hello.cpp:1: oistream.h: No such file or directory
 \end{verbatim}
-%
+
 There is a lot of information on this line, but it is presented
 in a dense format that is not easy to interpret.  A more friendly
 compiler might say something like:
